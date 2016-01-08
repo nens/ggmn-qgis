@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=GGMN lizard integration
+qgisMinimumVersion=2.8
+description=Download GGMN data from lizard, interpolate and add new points
+version=0.1
+author=Reinout van Rees, Nelen & Schuurmans
+email=reinout@vanrees.org
+
+about=GGMN lizard integration
+
+tracker=https://github.com/nens/ggmn-qgis/issues
+repository=https://github.com/nens/ggmn-qgis
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=lizard
+
+homepage=https://github.com/nens/ggmn-qgis
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
