@@ -59,7 +59,9 @@ class LizardDownloader:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = LizardDownloaderDialog()
+        self.import_dlg = LizardDownloaderDialog()
+        self.interpolation_dlg = LizardDownloaderDialog()  # TODO
+        self.upload_dlg = LizardDownloaderDialog()  # TODO
 
         # Declare instance attributes
         self.actions = []
@@ -164,9 +166,30 @@ class LizardDownloader:
         self.add_action(
             icon_path,
             text=self.tr(u'Download from Lizard'),
-            callback=self.run,
+            callback=self.run_import,
+            add_to_toolbar=False,
             parent=self.iface.mainWindow())
-
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Interpolate groundwater level'),
+            callback=self.run_interpolation,
+            add_to_toolbar=True,
+            enabled_flag=False,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Add custom point'),
+            callback=self.run_add_point,
+            add_to_toolbar=True,
+            enabled_flag=False,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Upload custom points to Lizard'),
+            callback=self.run_upload,
+            add_to_toolbar=False,
+            enabled_flag=False,
+            parent=self.iface.mainWindow())
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -178,13 +201,41 @@ class LizardDownloader:
         # remove the toolbar
         del self.toolbar
 
-
-    def run(self):
+    def run_import(self):
         """Run method that performs all the real work"""
         # show the dialog
-        self.dlg.show()
+        self.import_dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.import_dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
+
+    def run_interpolation(self):
+        """Run method that performs all the real work"""
+        # show the dialog
+        self.interpolation_dlg.show()
+        # Run the dialog event loop
+        result = self.interpolation_dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
+
+    def run_add_point(self):
+        """Run method that performs all the real work"""
+        # React on point-adding
+        pass
+
+    def run_upload(self):
+        """Run method that performs all the real work"""
+        # show the dialog
+        self.upload_dlg.show()
+        # Run the dialog event loop
+        result = self.upload_dlg.exec_()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and

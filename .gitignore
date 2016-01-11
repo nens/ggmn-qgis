@@ -1,2 +1,5 @@
 *.pyc
 .coverage
+.noseids
+help/build/
+resources.py
