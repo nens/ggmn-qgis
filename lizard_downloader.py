@@ -3,7 +3,7 @@
 /***************************************************************************
  LizardDownloader
                                  A QGIS plugin
- Download GGMN data from lizard, interpolate and add new points
+ Download GGMN data from lizard and add new points
                               -------------------
         begin                : 2016-01-08
         git sha              : $Format:%H$
@@ -21,14 +21,28 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
-# Initialize Qt resources from file resources.py
-import resources
-# Import the code for the dialog
+from PyQt4.QtGui import QAction, QIcon, QMessageBox
 from lizard_downloader_dialog import LizardDownloaderDialog
+from qgis.core import QgsMessageLog
+
 import os.path
+import resources
 
 resources  # Pyflakes
+
+
+def pop_up_info(msg='', title='Information', parent=None):
+    """Display an info message via Qt box"""
+    QMessageBox.information(parent, title, '%s' % msg)
+
+
+def log(msg, level='INFO'):
+    """Shortcut for QgsMessageLog.logMessage function."""
+    if level not in ['DEBUG', 'INFO', 'CRITICAL', 'WARNING']:
+        level = 'INFO'
+    loglevel = getattr(QgsMessageLog, level)
+    QgsMessageLog.logMessage(msg, level=loglevel)
+
 
 
 class LizardDownloader:
@@ -62,7 +76,6 @@ class LizardDownloader:
 
         # Create the dialog (after translation) and keep reference
         self.import_dlg = LizardDownloaderDialog()
-        self.interpolation_dlg = LizardDownloaderDialog()  # TODO
         self.upload_dlg = LizardDownloaderDialog()  # TODO
 
         # Declare instance attributes
@@ -202,26 +215,19 @@ class LizardDownloader:
         result = self.import_dlg.exec_()
         # See if OK was pressed
         if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
-
-    def run_interpolation(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.interpolation_dlg.show()
-        # Run the dialog event loop
-        result = self.interpolation_dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+            username = self.import_dlg.username.text()
+            password = self.import_dlg.password.text()
+            extent = self.iface.mapCanvas().extent()
+            x_max = extent.xMaximum()
+            y_max = extent.yMaximum()
+            x_min = extent.xMinimum()
+            y_min = extent.yMinimum()
+            pop_up_info("%s: %s (%s, %s) - (%s, %s)" % (
+                username, password, x_min, y_min, x_max, y_max))
 
     def run_add_point(self):
         """Run method that performs all the real work"""
-        # React on point-adding
-        pass
+        pop_up_info("To be implemented")
 
     def run_upload(self):
         """Run method that performs all the real work"""
@@ -231,6 +237,4 @@ class LizardDownloader:
         result = self.upload_dlg.exec_()
         # See if OK was pressed
         if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+            pop_up_info("To be implemented")
