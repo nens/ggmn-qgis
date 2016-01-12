@@ -71,7 +71,7 @@ default: compile
 
 compile: $(COMPILED_RESOURCE_FILES)
 
-%.py : %.qrc $(RESOURCES_SRC)
+%.py : %.qrc $(RESOURCES_SRC) icon.png
 	pyrcc4 -o $*.py  $<
 
 %.qm : %.ts
