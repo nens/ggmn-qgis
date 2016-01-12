@@ -171,13 +171,6 @@ class LizardDownloader:
             parent=self.iface.mainWindow())
         self.add_action(
             icon_path,
-            text=self.tr(u'Interpolate groundwater level'),
-            callback=self.run_interpolation,
-            add_to_toolbar=True,
-            enabled_flag=False,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            icon_path,
             text=self.tr(u'Add custom point'),
             callback=self.run_add_point,
             add_to_toolbar=True,
