@@ -386,6 +386,7 @@ class GroundwaterTimeSeries(TimeSeries):
             "location__organisation__unique_id": "f757d2eb6f4841b1a92d57d7e72f450c"
         }
 
+
 class GroundwaterTimeSeriesAndLocations(object):
 
     def __init__(self):
@@ -396,10 +397,10 @@ class GroundwaterTimeSeriesAndLocations(object):
 
     def bbox(self, south_west, north_east, start='0001-01-01T00:00:00Z',
              end=None, groundwater_type="GWmMSL"):
-        if not end:
-            self.end = jsdt.now_iso()
-        else:
+        if end:
             self.end = end
+        else:
+            self.end = jsdt.now_iso()
         self.start = start
         self.ts.queries = {"name": groundwater_type}
         st1 = time()
@@ -426,7 +427,7 @@ class GroundwaterTimeSeriesAndLocations(object):
             for x in self.ts.results
         ])
         if not npts:
-            return {}
+            return
 
         npts_calculated = np.hstack((
             npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
@@ -450,6 +451,7 @@ class GroundwaterTimeSeriesAndLocations(object):
                 },
                 "values": values
             }
+
 
 if __name__ == '__main__':
     end="1452470400000"
