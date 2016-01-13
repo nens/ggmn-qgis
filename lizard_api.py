@@ -82,7 +82,7 @@ class Base(object):
         # A bit dirty, but store the url for later debugging.
         self.url = url
 
-        # open('/tmp/url.txt', 'w').write(url)
+        open('/tmp/url.txt', 'a').write(url + '\n')
         self.fetch(url)
         print('Number found {} : {} with URL: {}'.format(
             self.data_type, self.json.get('count', 0), url))
