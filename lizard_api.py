@@ -425,13 +425,13 @@ class GroundwaterTimeSeriesAndLocations(object):
                 }
         # np array with columns: 'min', 'max', 'sum', 'count', first, last
         stats = ('min', 'max', 'sum', 'count')
+        if not self.ts.results:
+            return
         npts = np.array([
             [float(x['events'][0][y]) for y in stats] +
             [int(x['first_value_timestamp']), int(x['last_value_timestamp'])]
             for x in self.ts.results
         ])
-        if not npts:
-            return
 
         npts_calculated = np.hstack((
             npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
