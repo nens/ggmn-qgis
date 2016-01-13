@@ -425,6 +425,9 @@ class GroundwaterTimeSeriesAndLocations(object):
             [int(x['first_value_timestamp']), int(x['last_value_timestamp'])]
             for x in self.ts.results
         ])
+        if not npts:
+            return {}
+
         npts_calculated = np.hstack((
             npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
             (npts[:, 2] / npts[:, 3]).reshape(-1, 1), npts[:,4:]
@@ -439,7 +442,7 @@ class GroundwaterTimeSeriesAndLocations(object):
         npts_max = npts_calculated.max(0)
         extremes = {stat: {'min': npts_min[i], 'max': npts_max[i]}
                     for i, stat in stats}
-        self.result = {
+        return {
                 "extremes": extremes,
                 "dates": {
                     "start": jsdt.js_to_datetime(npts_min[4]),
@@ -447,7 +450,6 @@ class GroundwaterTimeSeriesAndLocations(object):
                 },
                 "values": values
             }
-        return self.result
 
 if __name__ == '__main__':
     end="1452470400000"

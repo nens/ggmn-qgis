@@ -26,7 +26,7 @@ class QGisLizardImporter(object):
         self.groundwater.bbox(south_west, north_east, start, end,
                                 groundwater_type)
         self.data = self.groundwater.results_to_dict()
-        pprint(self.groundwater.result)
+        pprint(self.data)
         self.extremes = self.data['extremes']
         self.dates = self.data['dates']
         self.values = self.data['values']
