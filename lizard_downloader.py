@@ -45,7 +45,6 @@ def log(msg, level='INFO'):
     QgsMessageLog.logMessage(msg, level=loglevel)
 
 
-
 class LizardDownloader:
     """QGIS Plugin Implementation."""
 
@@ -238,15 +237,19 @@ class LizardDownloader:
                 north_east=[y_max, x_max],
                 start=start,
                 end=end,
-                groundwater_type='GWmMSL'
-            )
-            self.iface.messageBar().pushMessage(
-                "Lizard",
-                "Creating and opening a shapefile...")
-            gw_info.data_to_shape(directory='/tmp',
-                                  filename='test2.shp',
-                                  overwrite=True)
-            gw_info.load_shape()
+                groundwater_type='GWmMSL')
+            if gw_info.data:
+                self.iface.messageBar().pushMessage(
+                    "Lizard",
+                    "Creating and opening a shapefile...")
+                gw_info.data_to_shape(directory='/tmp',
+                                      filename='test2.shp',
+                                      overwrite=True)
+                gw_info.load_shape()
+            else:
+                self.iface.messageBar().pushMessage(
+                    "Lizard",
+                    "No data found for time period and extend...")
 
     def run_add_point(self):
         """Run method that performs all the real work"""
