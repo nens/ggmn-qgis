@@ -24,6 +24,7 @@ from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon, QMessageBox
 from lizard_downloader_dialog import LizardDownloaderDialog
 from qgis.core import QgsMessageLog
+from import_timeseries import QGisLizardImporter
 
 import os.path
 import resources
@@ -222,8 +223,30 @@ class LizardDownloader:
             y_max = extent.yMaximum()
             x_min = extent.xMinimum()
             y_min = extent.yMinimum()
-            pop_up_info("%s: %s (%s, %s) - (%s, %s)" % (
-                username, password, x_min, y_min, x_max, y_max))
+
+            # start_js_date = "-2208988800000"
+            # end_js_date = "1452470400000"
+            start = '1900-01-01T00:00:00Z'
+            end = '2016-01-01T00:00:00Z'
+            gw_info = QGisLizardImporter(username=username, password=password)
+
+            self.iface.messageBar().pushMessage(
+                "Lizard",
+                "Downloading data (can take up to a minute)...")
+            gw_info.download(
+                south_west=[y_min, x_min],
+                north_east=[y_max, x_max],
+                start=start,
+                end=end,
+                groundwater_type='GWmMSL'
+            )
+            self.iface.messageBar().pushMessage(
+                "Lizard",
+                "Creating and opening a shapefile...")
+            gw_info.data_to_shape(directory='/tmp',
+                                  filename='test2.shp',
+                                  overwrite=True)
+            gw_info.load_shape()
 
     def run_add_point(self):
         """Run method that performs all the real work"""
