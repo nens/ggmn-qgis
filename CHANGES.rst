@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.1 (unreleased)
+0.1 (2016-01-13)
 ----------------
 
 - Generated the plugin with qgis' plugin builder.
