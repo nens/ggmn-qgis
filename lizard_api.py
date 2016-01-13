@@ -78,9 +78,11 @@ class Base(object):
                                if isinstance(value, list) else str(value))
                                for key, value in queries.items())
         url = join_urls(self.base_url, query)
+        # open('/tmp/url.txt', 'w').write(url)
         self.fetch(url)
         print('Number found {} : {} with URL: {}'.format(
             self.data_type, self.json.get('count', 0), url))
+        # open('/tmp/contents.txt', 'w').write(json.dumps(self.json))
         self.parse()
         return self.results
 
@@ -177,7 +179,7 @@ class Locations(Base):
 
     def __init__(self):
         self.uuids = []
-        super().__init__()
+        super(Locations, self).__init__()
 
     def bbox(self, south_west, north_east):
         """
@@ -237,7 +239,7 @@ class TimeSeries(Base):
 
     def __init__(self, base="http://ggmn.un-igrac.org"):
         self.uuids = []
-        super().__init__(base)
+        super(TimeSeries, self).__init__()
 
     def location_name(self, name):
         """
