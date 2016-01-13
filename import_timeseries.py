@@ -27,9 +27,6 @@ class QGisLizardImporter(object):
                                 groundwater_type)
         self.data = self.groundwater.results_to_dict()
         pprint(self.data)
-        self.extremes = self.data['extremes']
-        self.dates = self.data['dates']
-        self.values = self.data['values']
 
     def data_to_shape(self, directory="", filename="ggmn_groundwater.shp",
                       overwrite=False):
@@ -76,34 +73,34 @@ class QGisLizardImporter(object):
         layer.CreateField(ogr.FieldDefn("range", ogr.OFTReal))
 
         # Process the text file and add the attributes and features to the shapefile
-        for uuid, row in self.values.items():
-          # create the feature
-          feature = ogr.Feature(layer.GetLayerDefn())
-          # Set the attributes using the values from the delimited text file
-          feature.SetField("name", row['name'])
-          feature.SetField("loc_UUID", row['timeseries uuid'])
-          feature.SetField("ts_UUID", uuid)
-          feature.SetField("longitude", row['coordinates'][0])
-          feature.SetField("latitude", row['coordinates'][1])
-          feature.SetField("min", row['min'])
-          feature.SetField("mean", row['mean'])
-          feature.SetField("max", row['max'])
-          feature.SetField("range", row['range'])
+        for uuid, row in self.data['values'].items():
+            # create the feature
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Set the attributes using the values from the delimited text file
+            feature.SetField("name", row['name'])
+            feature.SetField("loc_UUID", row['timeseries uuid'])
+            feature.SetField("ts_UUID", uuid)
+            feature.SetField("longitude", row['coordinates'][0])
+            feature.SetField("latitude", row['coordinates'][1])
+            feature.SetField("min", row['min'])
+            feature.SetField("mean", row['mean'])
+            feature.SetField("max", row['max'])
+            feature.SetField("range", row['range'])
 
 
-          # create the WKT for the feature using Python string formatting
-          wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
-                                            lat=row['coordinates'][1])
+            # create the WKT for the feature using Python string formatting
+            wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
+                                              lat=row['coordinates'][1])
 
-          # Create the point from the Well Known Txt
-          point = ogr.CreateGeometryFromWkt(wkt)
+            # Create the point from the Well Known Txt
+            point = ogr.CreateGeometryFromWkt(wkt)
 
-          # Set the feature geometry using the point
-          feature.SetGeometry(point)
-          # Create the feature in the layer (shapefile)
-          layer.CreateFeature(feature)
-          # Destroy the feature to free resources
-          feature.Destroy()
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Destroy the feature to free resources
+            feature.Destroy()
 
         # Destroy the data source to free resources
         data_source.Destroy()
@@ -118,8 +115,8 @@ if __name__ == '__main__':
     'Example how to use: '
 
     from freq.secretsettings import USR, PWD
-    end="1452470400000"
-    start="-2208988800000"
+    end = "1452470400000"
+    start = "-2208988800000"
     GWinfo = QGisLizardImporter(username=USR, password=PWD)
     GWinfo.download(
         south_west=[-65.80277639340238, -223.9453125],
