@@ -247,9 +247,38 @@ class LizardDownloader:
                                       overwrite=True)
                 gw_info.load_shape()
             else:
-                self.iface.messageBar().pushMessage(
-                    "Lizard",
-                    "No data found for time period and extend...")
+                def _split_url(url):
+                    return '\n&'.join(url.split('&'))
+                msg = """
+                No data found for period and extent.
+                Technical debug info follows:
+
+                Username: {username}
+                Bounding box: {y_min}, {x_min}
+                           to {y_max}, {x_max}
+
+                Start date: {start}
+                End date:   {end}
+
+                Locations url: {locations_url}
+
+                len(locations): {locations_len}
+
+                Timeseries url: {timeseries_url}
+
+                len(timeseries): {timeseries_len}
+                """.format(username=username,
+                           y_min=y_min,
+                           y_max=y_max,
+                           x_min=x_min,
+                           x_max=x_max,
+                           start=start,
+                           end=end,
+                           locations_url=_split_url(gw_info.groundwater.locs.url),
+                           timeseries_url=_split_url(gw_info.groundwater.ts.url),
+                           locations_len=len(gw_info.groundwater.locs.results),
+                           timeseries_len=len(gw_info.groundwater.ts.results))
+                pop_up_info(msg=msg, title='No data found')
 
     def run_add_point(self):
         """Run method that performs all the real work"""
