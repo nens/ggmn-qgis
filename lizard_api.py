@@ -78,6 +78,10 @@ class Base(object):
                                if isinstance(value, list) else str(value))
                                for key, value in queries.items())
         url = join_urls(self.base_url, query)
+
+        # A bit dirty, but store the url for later debugging.
+        self.url = url
+
         # open('/tmp/url.txt', 'w').write(url)
         self.fetch(url)
         print('Number found {} : {} with URL: {}'.format(
