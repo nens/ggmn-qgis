@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.3 (unreleased)
+0.3 (2016-01-15)
 ----------------
 
 - Placing the test shapefile in the user's home directory instead of in
