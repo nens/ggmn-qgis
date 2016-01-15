@@ -85,15 +85,15 @@ class QGisLizardImporter(object):
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
-            feature.SetField("name", str(row['name']))
+            feature.SetField("name", row['name'].encode('ascii', 'ignore'))
             feature.SetField("loc_UUID", str(row['timeseries uuid']))
             feature.SetField("ts_UUID", str(uuid))
-            feature.SetField("longitude", str(row['coordinates'][0]))
-            feature.SetField("latitude", str(row['coordinates'][1]))
-            feature.SetField("min", str(row['min']))
-            feature.SetField("mean", str(row['mean']))
-            feature.SetField("max", str(row['max']))
-            feature.SetField("range", str(row['range']))
+            feature.SetField("longitude", row['coordinates'][0])
+            feature.SetField("latitude", row['coordinates'][1])
+            feature.SetField("min", row['min'])
+            feature.SetField("mean", row['mean'])
+            feature.SetField("max", row['max'])
+            feature.SetField("range", row['range'])
 
 
             # create the WKT for the feature using Python string formatting

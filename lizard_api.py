@@ -337,9 +337,7 @@ class TimeSeries(Base):
         if len(self.results) == 0:
             self.response = {}
             return self.response
-        if values:
-            values = values
-        else:
+        if not values:
             values = {}
         if not statistic and self.statistic:
             statistic = self.statistic
@@ -399,7 +397,7 @@ class TimeSeries(Base):
                 },
                 "values": values
             }
-        pprint(self.response)
+        # pprint(self.response)
 
         return self.response
 
@@ -455,16 +453,23 @@ class GroundwaterTimeSeriesAndLocations(object):
         if values:
             self.values = values
         for loc in self.locs.results:
-            self.values.get(loc['uuid'], {}).update({
+            if loc['uuid'] in self.values:
+                self.values[loc['uuid']].update({
                     'coordinates': loc['geometry']['coordinates'],
                     'name': loc['name']
                 })
+            else:
+                self.values[loc['uuid']] = {
+                    'coordinates': loc['geometry']['coordinates'],
+                    'name': loc['name']
+                }
         self.response = self.values
 
     def results_to_dict(self):
         self.locs_to_dict()
         self.ts.ts_to_dict(values=self.values, date_time='dt')
         return self.ts.response
+
 
 if __name__ == '__main__':
     end="1452470400000"
