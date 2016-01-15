@@ -78,9 +78,15 @@ class Base(object):
                                if isinstance(value, list) else str(value))
                                for key, value in queries.items())
         url = join_urls(self.base_url, query)
+
+        # A bit dirty, but store the url for later debugging.
+        self.url = url
+
+        open('/tmp/url.txt', 'a').write(url + '\n')
         self.fetch(url)
         print('Number found {} : {} with URL: {}'.format(
             self.data_type, self.json.get('count', 0), url))
+        # open('/tmp/contents.txt', 'w').write(json.dumps(self.json))
         self.parse()
         return self.results
 
@@ -180,7 +186,7 @@ class Locations(Base):
 
     def __init__(self):
         self.uuids = []
-        super().__init__()
+        super(Locations, self).__init__()
 
     def bbox(self, south_west, north_east):
         """
@@ -241,7 +247,7 @@ class TimeSeries(Base):
     def __init__(self, base="http://ggmn.un-igrac.org"):
         self.uuids = []
         self.statistic = None
-        super().__init__(base)
+        super(TimeSeries, self).__init__()
 
     def location_name(self, name):
         """
@@ -435,10 +441,10 @@ class GroundwaterTimeSeriesAndLocations(object):
 
     def bbox(self, south_west, north_east, start='0001-01-01T00:00:00Z',
              end=None, groundwater_type="GWmMSL"):
-        if not end:
-            self.end = jsdt.now_iso()
-        else:
+        if end:
             self.end = end
+        else:
+            self.end = jsdt.now_iso()
         self.start = start
         self.ts.queries = {"name": groundwater_type}
         self.locs.bbox(south_west, north_east)

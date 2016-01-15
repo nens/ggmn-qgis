@@ -44,7 +44,8 @@ PLUGINNAME = LizardDownloader
 
 PY_FILES = \
 	__init__.py \
-	lizard_downloader.py lizard_downloader_dialog.py
+	lizard_downloader.py lizard_downloader_dialog.py \
+	lizard_api.py jsdatetime.py import_timeseries.py
 
 UI_FILES = lizard_downloader_dialog_base.ui
 
@@ -71,7 +72,7 @@ default: compile
 
 compile: $(COMPILED_RESOURCE_FILES)
 
-%.py : %.qrc $(RESOURCES_SRC)
+%.py : %.qrc $(RESOURCES_SRC) $(EXTRAS)
 	pyrcc4 -o $*.py  $<
 
 %.qm : %.ts

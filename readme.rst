@@ -1,32 +1,48 @@
-Plugin Builder Results
+GGMN qgis plugin
+================
 
-Your plugin LizardDownloader was created in::
+Goal: integrate the GGMN data from Lizard so that you can do additional
+analysis in qgis: mainly interpolation. The interpolation results (rasters)
+can be uploaded to Lizard. Also you should be able to add local data points
+and upload them back to Lizard.
 
-    /Users/reinout/Documents/LizardDownloader
+The plugin will *not* provide a complete setup and walk-through. You should
+set up a base map and the interpolation plugin yourself, for instance.
 
-Your QGIS plugin directory is located at::
 
-    /Users/reinout/.qgis2/python/plugins
+Prerequisites
+-------------
 
-What's Next:
+Currently you must install the python ``requests`` library inside the python
+used by qgis. Calling ``easy_install requests`` is often enough, but it
+depends on your OS.
 
-* Copy the entire directory containing your new plugin to the QGIS plugin
-  directory
 
-* Compile the resources file using pyrcc4
+Installation
+------------
 
-* Run the tests (``make test``)
+Intention is to upload the plugin to the qgis plugin repo so that you have a
+standard installation method. The plugin is called "GGMN Lizard integration".
 
-* Test the plugin by enabling it in the QGIS plugin manager
+Recommended extra plugins:
 
-* Customize it by editing the implementation file: ``lizard_downloader.py``
+- Interpolation plugin (for doing interpolation analysis).
 
-* Create your own custom icon, replacing the default icon.png
+- QuickMapServices (for adding a base layer like openstreetmap).
 
-* Modify your user interface by opening LizardDownloader.ui in Qt Designer
 
-* You can use the Makefile to compile your Ui and resource files when
-  you make changes. This requires GNU make (gmake)
+Usage
+-----
 
-For more information, see the PyQGIS Developer Cookbook at:
-http://www.qgis.org/pyqgis-cookbook/index.html
+Zoom to the area you want to see. Currently the coordinate system needs to be
+set to ``EPSG:4326``, this will be fixed later on.
+
+Via the menu bar, open "Plugins > GGMN Lizard integration > Download from
+Lizard" and fill in your username/password. (TODO: select period).
+
+This adds a vector layer, saved as a shapefile, with the available groundwater
+data. (TODO: choose filename).
+
+For interpolation, open the plugin "Raster > interpolation >
+Interpolation". Choose the ``ggmn_groundwater`` layer and one of the
+min/mean/max items as source and select an output file.
