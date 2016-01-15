@@ -4,6 +4,8 @@ GGMN Lizard qgis plugin changelog
 0.2 (unreleased)
 ----------------
 
+- Removed dependency on requests library and replaced it by urllib2.
+
 - Added hardcoded bounding box so that we get all the data.
 
 
