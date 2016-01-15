@@ -3,8 +3,8 @@ __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 import json
 from pprint import pprint  # left here for debugging purposes
 from time import time
+import urllib2
 
-import requests
 import numpy as np
 
 import jsdatetime as jsdt
@@ -48,7 +48,7 @@ class Base(object):
         """
         return {}
 
-    def __init__(self, base="http://ggmn.un-igrac.org"):
+    def __init__(self, base="https://ggmn.un-igrac.org"):
         """
         :param base: the site one wishes to connect to. Defaults to the
                      Lizard staging site.
@@ -58,8 +58,8 @@ class Base(object):
         if base.startswith('http'):
             self.base = base
         else:
-            self.base = join_urls('https:/', base) # without extra '/', this is
-                                                   # added in join_urls
+            self.base = join_urls('https:/', base)  # without extra '/', this is
+                                                    # added in join_urls
         self.base_url = join_urls(self.base, 'api/v2', self.data_type)
 
     def get(self, **queries):
@@ -92,25 +92,26 @@ class Base(object):
                     [base_url]/api/v2/[endpoint]/?[query_key]=[query_value]&...
         :return: the JSON from the response
         """
-        if self.use_header:
-            response = requests.get(url, headers=self.header)
-        else:
-            response = requests.get(url)
-        self.json = response.json()
+        request_obj = urllib2.Request(url, headers=self.header)
+        response = urllib2.urlopen(request_obj)
+        content = response.read().decode('UTF-8')
+        response.close()
+        self.json = json.loads(content)
+
         return self.json
 
-    def post(self, UUID, data):
-        """
-        POST data to the api.
-        :param UUID: UUID of the object in the database you wish to store
-                     data to.
-        :param data: Dictionary with the data to post to the api
-        """
-        post_url = join_urls(self.base_url, UUID, 'data')
-        if self.use_header:
-            requests.post(post_url, data=json.dumps(data), headers=self.header)
-        else:
-            requests.post(post_url, data=json.dumps(data))
+    # def post(self, UUID, data):
+    #     """
+    #     POST data to the api.
+    #     :param UUID: UUID of the object in the database you wish to store
+    #                  data to.
+    #     :param data: Dictionary with the data to post to the api
+    #     """
+    #     post_url = join_urls(self.base_url, UUID, 'data')
+    #     if self.use_header:
+    #         requests.post(post_url, data=json.dumps(data), headers=self.header)
+    #     else:
+    #         requests.post(post_url, data=json.dumps(data))
 
     def parse(self):
         """
@@ -147,10 +148,12 @@ class Base(object):
         """
         The header with credentials for the api.
         """
-        return {
-            "username": self.username,
-            "password": self.password
-        }
+        if self.use_header:
+            return {
+                "username": self.username,
+                "password": self.password
+            }
+        return {}
 
 
 class Organisations(Base):
@@ -237,6 +240,7 @@ class TimeSeries(Base):
 
     def __init__(self, base="http://ggmn.un-igrac.org"):
         self.uuids = []
+        self.statistic = None
         super().__init__(base)
 
     def location_name(self, name):
@@ -279,7 +283,7 @@ class TimeSeries(Base):
             end = jsdt.now_iso()
         self.get(uuid=uuid, start=start, end=end)
 
-    def bbox(self, south_west, north_east, statistic='mean',
+    def bbox(self, south_west, north_east, statistic=None,
                   start='0001-01-01T00:00:00Z', end=None):
         """
         Find all timeseries within a certain bounding box.
@@ -292,9 +296,12 @@ class TimeSeries(Base):
         :param end: end timestamp in ISO 8601 format
         :return: a dictionary of the api-response.
         """
-        self.statistic = statistic
         if statistic == 'mean':
             statistic = ['count', 'sum']
+            self.statistic = statistic
+        if not statistic:
+            statistic = ['min', 'max', 'count', 'sum']
+            self.statistic = None
         if not end:
             end = jsdt.now_iso()
 
@@ -308,53 +315,87 @@ class TimeSeries(Base):
             [max_lon, min_lat],
             [min_lon, min_lat],
         ]
-        points = [' '.join([str(x), str(y)]) for x, y in polygon_coordinates]
-        geom_within = 'POLYGON ((' + ', '.join(points) + '))'
+        points = ['%20'.join([str(x), str(y)]) for x, y in polygon_coordinates]
+        geom_within = 'POLYGON%20((' + ',%20'.join(points) + '))'
         self.get(start=start, end=end, min_points=1, fields=statistic,
                  location__geom_within=geom_within)
 
-    def minmax(self, extreme, results):
-        args = {
-            'mean': ('events', 0),
-            'first': ('first_value_timestamp', ),
-            'last': ('last_value_timestamp', )
-        }.get(extreme, ('events', 0, extreme))
-        def lambda_func(x):
-            for arg in args:
-                x = x[arg]
-            return x
-        lmbd = {
-            'mean': lambda x: lambda_func(x)['sum']/ lambda_func(x)['count']
-        }.get(extreme, lambda_func)
-        return {
-            'min': lmbd(min(results, key=lmbd)),
-            'max': lmbd(max(results, key=lmbd))
-        }
+    def ts_to_dict(self, statistic=None, values=None,
+                   start_date=None, end_date=None, date_time='js'):
+        """
+        :param date_time: default: js. Several options:
+            'js': javascript integer datetime representation
+            'dt': python datetime object
+            'str': date in date format (dutch representation)
+        """
+        if len(self.results) == 0:
+            self.response = {}
+            return self.response
+        if values:
+            values = values
+        else:
+            values = {}
+        if not statistic and self.statistic:
+            statistic = self.statistic
 
-    def min_max_mean(self, start_date, end_date):
-        values = {}
-        for x in self.results:
-            val = x['events'][0][self.statistic] if self.statistic != 'mean' \
-                else x['events'][0]['sum'] / x['events'][0]['count']
-            if x['uuid'] not in self.uuids:
-                values.update({
-                    x['location']['uuid']: val
-                })
-                self.uuids.append(x['uuid'])
-        first = max(int(self.minmax('first', self.results)['min']),
-                    jsdt.datestring_to_js(date_string=start_date, iso=False))
-        last = min(int(self.minmax('last', self.results)['max']),
-                    jsdt.datestring_to_js(date_string=end_date, iso=False))
-        start_date = jsdt.js_to_datestring(js_date=first, iso=False)
-        end_date = jsdt.js_to_datestring(js_date=last, iso=False)
-        return {
-                "extremes": self.minmax(self.statistic, self.results),
+        # np array with cols: 'min', 'max', 'sum', 'count', 'first', 'last'
+        if not statistic:
+            stats1 = ('min', 'max', 'sum', 'count')
+            stats2 = ((0, 'min'), (1, 'max'), (2, 'range'), (3, 'mean'))
+            start_index, end_index = 4, 5
+        else:
+            stats1 = ('sum', 'count') if statistic == 'mean' else (statistic, )
+            stats2 = ((0, statistic), )
+            start_index = int(statistic == 'mean') + 1
+            end_index = start_index + 1
+        npts = np.array([
+            [None for y in stats1] if len(x['events']) == 0 else
+            [float(x['events'][0][y]) for y in stats1] +
+            [int(x['first_value_timestamp']), int(x['last_value_timestamp'])]
+            for x in self.results
+        ])
+        if statistic:
+            npts_calculated = np.hstack((
+                (npts[:, 0] / npts[:, 1]).reshape(-1, 1) if statistic == "mean"
+                    else npts[:, 0].reshape(-1, 1),
+                npts[:, slice(start_index, -1)]
+            ))
+        else:
+            npts_calculated = np.hstack((
+                npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
+                (npts[:, 2] / npts[:, 3]).reshape(-1, 1), npts[:, 4:]
+            ))
+
+        for i, row in enumerate(npts_calculated):
+            location_uuid = self.results[i]['location']['uuid']
+            loc_dict = values.get(location_uuid, {})
+            loc_dict.update({stat: row[i] for i, stat in stats2})
+            loc_dict['timeseries uuid'] = self.results[i]['uuid']
+            values[location_uuid] = loc_dict
+        npts_min = npts_calculated.min(0)
+        npts_max = npts_calculated.max(0)
+        extremes = {stat: {'min': npts_min[i], 'max': npts_max[i]}
+                    for i, stat in stats2}
+        dt_conversion = {
+            'js': lambda x: x,
+            'dt': jsdt.js_to_datetime,
+            'str': jsdt.js_to_datestring
+        }[date_time]
+        start = dt_conversion(npts_min[-2]) if not start_date else \
+            dt_conversion(max(start_date, npts_min[-2]))
+        end = dt_conversion(npts_max[-1]) if not end_date else \
+            dt_conversion(min(end_date, npts_max[-1]))
+        self.response = {
+                "extremes": extremes,
                 "dates": {
-                    "start": start_date,
-                    "end": end_date
+                    "start": start,
+                    "end": end
                 },
                 "values": values
             }
+        pprint(self.response)
+
+        return self.response
 
 
 class GroundwaterLocations(Locations):
@@ -384,13 +425,13 @@ class GroundwaterTimeSeries(TimeSeries):
             "location__organisation__unique_id": "f757d2eb6f4841b1a92d57d7e72f450c"
         }
 
+
 class GroundwaterTimeSeriesAndLocations(object):
 
     def __init__(self):
-        st = time()
         self.locs = GroundwaterLocations()
         self.ts = GroundwaterTimeSeries()
-        print('init', time() - st)
+        self.values = {}
 
     def bbox(self, south_west, north_east, start='0001-01-01T00:00:00Z',
              end=None, groundwater_type="GWmMSL"):
@@ -400,52 +441,24 @@ class GroundwaterTimeSeriesAndLocations(object):
             self.end = end
         self.start = start
         self.ts.queries = {"name": groundwater_type}
-        st1 = time()
         self.locs.bbox(south_west, north_east)
-        st2 = time()
-        print('locs.bbox', st2 - st1)
-        self.ts.bbox(south_west, north_east, ['min', 'max', 'count', 'sum'],
-                     start,
-                     self.end)
-        print('ts.bbox', time() - st2)
+        self.ts.bbox(south_west=south_west, north_east=north_east, start=start,
+                     end=self.end)
 
-    def results_to_dict(self):
-        values = {}
+    def locs_to_dict(self, values=None):
+        if values:
+            self.values = values
         for loc in self.locs.results:
-            values[loc['uuid']] = {
+            self.values.get(loc['uuid'], {}).update({
                     'coordinates': loc['geometry']['coordinates'],
                     'name': loc['name']
-                }
-        # np array with columns: 'min', 'max', 'sum', 'count', first, last
-        stats = ('min', 'max', 'sum', 'count')
-        npts = np.array([
-            [float(x['events'][0][y]) for y in stats] +
-            [int(x['first_value_timestamp']), int(x['last_value_timestamp'])]
-            for x in self.ts.results
-        ])
-        npts_calculated = np.hstack((
-            npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
-            (npts[:, 2] / npts[:, 3]).reshape(-1, 1), npts[:,4:]
-        ))
-        stats = ((0, 'min'), (1, 'max'), (2, 'range'), (3, 'mean'))
-        for i, row in enumerate(npts_calculated):
-            location_uuid = self.ts.results[i]['location']['uuid']
-            gw_point = {stat: row[i] for i, stat in stats}
-            gw_point['timeseries uuid'] = self.ts.results[i]['uuid']
-            values[location_uuid].update(gw_point)
-        npts_min = npts_calculated.min(0)
-        npts_max = npts_calculated.max(0)
-        extremes = {stat: {'min': npts_min[i], 'max': npts_max[i]}
-                    for i, stat in stats}
-        self.result = {
-                "extremes": extremes,
-                "dates": {
-                    "start": jsdt.js_to_datetime(npts_min[4]),
-                    "end": jsdt.js_to_datetime(npts_max[5])
-                },
-                "values": values
-            }
-        return self.result
+                })
+        self.response = self.values
+
+    def results_to_dict(self):
+        self.locs_to_dict()
+        self.ts.ts_to_dict(values=self.values, date_time='dt')
+        return self.ts.response
 
 if __name__ == '__main__':
     end="1452470400000"
