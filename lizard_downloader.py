@@ -217,11 +217,6 @@ class LizardDownloader:
         if result:
             username = self.import_dlg.username.text()
             password = self.import_dlg.password.text()
-            extent = self.iface.mapCanvas().extent()
-            x_max = extent.xMaximum()
-            y_max = extent.yMaximum()
-            x_min = extent.xMinimum()
-            y_min = extent.yMinimum()
 
             # start_js_date = "-2208988800000"
             # end_js_date = "1452470400000"
@@ -233,8 +228,9 @@ class LizardDownloader:
                 "Lizard",
                 "Downloading data (can take up to a minute)...")
             gw_info.download(
-                south_west=[y_min, x_min],
-                north_east=[y_max, x_max],
+                south_west=[-65.80277639340238, -223.9453125],
+                north_east=[81.46626086056541, 187.3828125],
+                # ^^^ hardcoded
                 start=start,
                 end=end,
                 groundwater_type='GWmMSL')
@@ -254,8 +250,6 @@ class LizardDownloader:
                 Technical debug info follows:
 
                 Username: {username}
-                Bounding box: {y_min}, {x_min}
-                           to {y_max}, {x_max}
 
                 Start date: {start}
                 End date:   {end}
@@ -268,10 +262,10 @@ class LizardDownloader:
 
                 len(timeseries): {timeseries_len}
                 """.format(username=username,
-                           y_min=y_min,
-                           y_max=y_max,
-                           x_min=x_min,
-                           x_max=x_max,
+                           # y_min=y_min,
+                           # y_max=y_max,
+                           # x_min=x_min,
+                           # x_max=x_max,
                            start=start,
                            end=end,
                            locations_url=_split_url(gw_info.groundwater.locs.url),

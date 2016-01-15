@@ -4,7 +4,7 @@ GGMN Lizard qgis plugin changelog
 0.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Added hardcoded bounding box so that we get all the data.
 
 
 0.1 (2016-01-13)
