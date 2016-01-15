@@ -4,7 +4,8 @@ GGMN Lizard qgis plugin changelog
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Placing the test shapefile in the user's home directory instead of in
+  ``/tmp`` which doesn't exist on windows.
 
 
 0.2 (2016-01-15)
