@@ -31,7 +31,8 @@ Via the menu bar, open "Plugins > GGMN Lizard integration > Download from
 Lizard" and fill in your username/password. (TODO: select period).
 
 This adds a vector layer, saved as a shapefile, with the available groundwater
-data. (TODO: choose filename).
+data. Currently the shapefile is called ``ggmn_test.shp`` and it is placed in
+your home directory. (TODO: choose filename and location).
 
 For interpolation, open the plugin "Raster > interpolation >
 Interpolation". Choose the ``ggmn_groundwater`` layer and one of the
