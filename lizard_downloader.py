@@ -211,6 +211,7 @@ class LizardDownloader:
         """Run method that performs all the real work"""
         # show the dialog
         self.import_dlg.show()
+
         # Run the dialog event loop
         result = self.import_dlg.exec_()
         # See if OK was pressed
@@ -238,8 +239,8 @@ class LizardDownloader:
                 self.iface.messageBar().pushMessage(
                     "Lizard",
                     "Creating and opening a shapefile...")
-                gw_info.data_to_shape(directory='/tmp',
-                                      filename='test2.shp',
+                gw_info.data_to_shape(directory=os.path.expanduser('~'),
+                                      filename='ggmn_test.shp',
                                       overwrite=True)
                 gw_info.load_shape()
             else:
