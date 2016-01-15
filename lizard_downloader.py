@@ -221,7 +221,7 @@ class LizardDownloader:
             # start_js_date = "-2208988800000"
             # end_js_date = "1452470400000"
             start = '1900-01-01T00:00:00Z'
-            end = '2016-01-01T00:00:00Z'
+            end = '2017-01-01T00:00:00Z'
             gw_info = QGisLizardImporter(username=username, password=password)
 
             self.iface.messageBar().pushMessage(
