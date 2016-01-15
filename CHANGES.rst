@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.2 (unreleased)
+0.2 (2016-01-15)
 ----------------
 
 - Removed dependency on requests library and replaced it by urllib2.
