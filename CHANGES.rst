@@ -4,7 +4,8 @@ GGMN Lizard qgis plugin changelog
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Removed debug function that writes into ``/tmp/`` which doesn't exist on
+  windows.
 
 
 0.3 (2016-01-15)
