@@ -1,6 +1,12 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
+0.7 (unreleased)
+----------------
+
+- Nothing changed yet.
+
+
 0.6 (2016-01-19)
 ----------------
 
