@@ -40,3 +40,12 @@ min/mean/max items as source and select an output file.
 
 
 TODO: better messages, better error handling, data upload, documentation.
+
+
+Internal note: releasing the plugin
+-----------------------------------
+
+Use zest.releaser with the qgispluginreleaser extension installed. You'll have
+to install it either globally or in a virtualenv.
+
+This copies a zipfile with the right version number to the current directory.
