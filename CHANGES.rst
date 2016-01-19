@@ -4,7 +4,7 @@ GGMN Lizard qgis plugin changelog
 0.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Test release for testing new release procedure.
 
 
 0.5 (2016-01-19)
