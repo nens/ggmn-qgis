@@ -1,14 +1,13 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
-import os
+from lizard_api import GroundwaterTimeSeriesAndLocations
 from pprint import pprint
+from qgis.core import QgsVectorLayer
+from qgis.core import QgsMapLayerRegistry
 
+import os
 import osgeo.ogr as ogr
 import osgeo.osr as osr
-
-from qgis.core import *
-
-from lizard_api import GroundwaterTimeSeriesAndLocations
 
 
 class WriteShapefileError(Exception):
@@ -26,7 +25,7 @@ class QGisLizardImporter(object):
 
     def download(self, south_west, north_east, start, end, groundwater_type):
         self.groundwater.bbox(south_west, north_east, start, end,
-                                groundwater_type)
+                              groundwater_type)
         self.data = self.groundwater.results_to_dict()
         # pprint(self.data)
 
@@ -80,7 +79,8 @@ class QGisLizardImporter(object):
         layer.CreateField(ogr.FieldDefn("max", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("range", ogr.OFTReal))
 
-        # Process the text file and add the attributes and features to the shapefile
+        # Process the text file and add the attributes and features to the
+        # shapefile
         for uuid, row in self.data['values'].items():
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
@@ -94,7 +94,6 @@ class QGisLizardImporter(object):
             feature.SetField("mean", row['mean'])
             feature.SetField("max", row['max'])
             feature.SetField("range", row['range'])
-
 
             # create the WKT for the feature using Python string formatting
             wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
