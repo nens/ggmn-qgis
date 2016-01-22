@@ -46,8 +46,9 @@ PY_FILES = \
 	__init__.py \
 	lizard_downloader.py lizard_downloader_dialog.py \
 	lizard_api.py jsdatetime.py import_timeseries.py
+	login_dialog.py
 
-UI_FILES = lizard_downloader_dialog_base.ui
+UI_FILES = lizard_downloader_dialog_base.ui login_dialog.ui
 
 EXTRAS = metadata.txt icon.png
 
