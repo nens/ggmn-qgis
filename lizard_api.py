@@ -1,13 +1,12 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
-import json
 from pprint import pprint  # left here for debugging purposes
 from time import time
-import urllib2
-
-import numpy as np
 
 import jsdatetime as jsdt
+import json
+import numpy as np
+import urllib2
 
 ## When you use this script stand alone, please set your login information here:
 USR = None  # Replace the with your user name.
