@@ -10,6 +10,8 @@ GGMN Lizard qgis plugin changelog
 
 - Added start/end date and organisation selection to Lizard import.
 
+- Added file save-as dialog.
+
 - Note: 0.5/0.6-0.7 were test releases for testing new release procedure.
 
 
