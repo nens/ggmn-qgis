@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion
 from PyQt4.QtCore import QCoreApplication, QDate
-from PyQt4.QtGui import QAction, QIcon, QMessageBox
+from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
 from import_timeseries import QGisLizardImporter
 from lizard_api import Organisations
 from lizard_downloader_dialog import LizardDownloaderDialog
@@ -96,6 +96,7 @@ class LizardDownloader:
         self.selected_organisation = None
         self.start_date = datetime.date(1930, 1, 1)
         self.end_date = datetime.date.today()
+        self.filename = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -304,13 +305,17 @@ class LizardDownloader:
                 end=end,
                 groundwater_type='GWmMSL')
             if gw_info.data:
-                self.iface.messageBar().pushMessage(
-                    "Lizard",
-                    "Creating and opening a shapefile...")
-                gw_info.data_to_shape(directory=os.path.expanduser('~'),
-                                      filename='ggmn_test.shp',
+                if not self.filename:
+                    # Take homedir as starting point
+                    self.filename = os.path.expanduser('~')
+                self.filename = QFileDialog.getSaveFileName(
+                    self.iface.mainWindow(),
+                    self.tr("New shapefile to save downloaded data in"),
+                    self.filename,
+                    self.tr("Shape files (*.shp)"))
+                gw_info.data_to_shape(filename=self.filename,
                                       overwrite=True)
-                gw_info.load_shape()
+                gw_info.load_shape(self.filename)
             else:
                 def _split_url(url):
                     return '\n&'.join(url.split('&'))

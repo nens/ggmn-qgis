@@ -31,30 +31,27 @@ class QGisLizardImporter(object):
         self.data = self.groundwater.results_to_dict()
         # pprint(self.data)
 
-    def data_to_shape(self, directory="", filename="ggmn_groundwater.shp",
+    def data_to_shape(self, filename="ggmn_groundwater.shp",
                       overwrite=False):
         # set up the shapefile driver
         driver = ogr.GetDriverByName("ESRI Shapefile")
         print("Driver: %s" % driver)
 
         # create the data source
-        self.file_location = os.path.join(directory, filename)
-        print("File location: %r" % self.file_location)
+        print("File location: %r" % filename)
 
-        if os.path.exists(self.file_location):
+        if os.path.exists(filename):
             if overwrite:
-                os.remove(self.file_location)
+                os.remove(filename)
             else:
                 raise WriteShapefileError(
-                    "File %s already exists, remove/rename it first" % self.file_location)
+                    "File %s already exists, remove/rename it first" % filename)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        data_source = driver.CreateDataSource(self.file_location)
+        data_source = driver.CreateDataSource(filename)
         print("data_source: %r" % data_source)
         if data_source is None:
             raise WriteShapefileError(
-                "Could not create shapefile %s" % self.file_location)
+                "Could not create shapefile %s" % filename)
 
         # create the spatial reference, WGS84
         spatial_reference = osr.SpatialReference()
@@ -114,9 +111,9 @@ class QGisLizardImporter(object):
         # Destroy the data source to free resources
         data_source.Destroy()
 
-    def load_shape(self):
+    def load_shape(self, filename):
         # load the shapefile
-        layer = QgsVectorLayer(self.file_location, "ggmn_groundwater", "ogr")
+        layer = QgsVectorLayer(filename, "ggmn_groundwater", "ogr")
         QgsMapLayerRegistry.instance().addMapLayer(layer)
 
 
@@ -134,7 +131,7 @@ if __name__ == '__main__':
         end=end,
         groundwater_type='GWmMSL'
     )
-    GWinfo.data_to_shape(directory='/vagrant/TeSt',
-                         filename='test2.shp',
+    filename='/vagrant/TeSt/test2.shp'
+    GWinfo.data_to_shape(filename,
                          overwrite=True)
-    GWinfo.load_shape()
+    GWinfo.load_shape(filename)
