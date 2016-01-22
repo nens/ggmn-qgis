@@ -176,17 +176,15 @@ class Organisations(Base):
         self.parse()
         return self.parse_elements('unique_id')
 
-    def as_dict(self):
+    def for_dialog(self):
         """
         :return: a list of organisations belonging one has access to
                 (with the credentials from the header attribute)
         """
         self.get()
         self.parse()
-        result = {}
-        for organisation in self.results:
-            result[organisation['unique_id']] = organisation['name']
-        return result
+        return [{'unique_id': organisation['unique_id'],
+                 'name': organisation['name']} for organisation in self.results]
 
 
 class Locations(Base):

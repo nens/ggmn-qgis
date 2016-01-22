@@ -20,7 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtCore import QSettings, QTranslator, qVersion
+from PyQt4.QtCore import QCoreApplication, QDate
 from PyQt4.QtGui import QAction, QIcon, QMessageBox
 from import_timeseries import QGisLizardImporter
 from lizard_api import Organisations
@@ -30,6 +31,7 @@ from qgis.core import QgsMessageLog
 
 import os.path
 import resources
+import datetime
 
 resources  # Pyflakes
 
@@ -90,7 +92,10 @@ class LizardDownloader:
         # Stored username/password, will be set by the login dialog.
         self.username = None
         self.password = None
-        self.organisations = {}  # Will be filled after logging in.
+        self.organisations = []  # Will be filled after logging in.
+        self.selected_organisation = None
+        self.start_date = datetime.date(1930, 1, 1)
+        self.end_date = datetime.date.today()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -227,7 +232,7 @@ class LizardDownloader:
         organisations_api = Organisations()
         organisations_api.username = self.username
         organisations_api.password = self.password
-        return organisations_api.as_dict()
+        return organisations_api.for_dialog()
 
     def run_login(self):
         """Show login dialog if the user isn't logged in yet."""
@@ -249,6 +254,26 @@ class LizardDownloader:
                 # Then we don't want to do anything either!
                 return
 
+        # Set up the dialog. (Should perhaps be moved to the dialog class.)
+        self.import_dialog.organisationComboBox.clear()
+        for organisation in self.organisations:
+            self.import_dialog.organisationComboBox.addItem(
+                organisation['name'],
+                organisation['unique_id'])
+        if self.selected_organisation:
+            self.import_dialog.organisationComboBox.setCurrentIndex(
+                self.import_dialog.organisationComboBox.findData(
+                    self.selected_organisation))
+
+        self.import_dialog.startDate.setDate(
+            QDate(self.start_date.year,
+                  self.start_date.month,
+                  self.start_date.day))
+        self.import_dialog.endDate.setDate(
+            QDate(self.end_date.year,
+                  self.end_date.month,
+                  self.end_date.day))
+
         # show the dialog
         self.import_dialog.show()
 
@@ -256,15 +281,17 @@ class LizardDownloader:
         result = self.import_dialog.exec_()
         # See if OK was pressed
         if result:
-            organisation_id = self.import_dialog.organisation_id.text()
+            index = self.import_dialog.organisationComboBox.currentIndex()
+            self.selected_organisation = self.organisations[index]['unique_id']
+            print("Selected org: %s" % self.selected_organisation)
+            self.start_date = self.import_dialog.startDate.date().toPyDate()
+            self.end_date = self.import_dialog.endDate.date().toPyDate()
 
-            # start_js_date = "-2208988800000"
-            # end_js_date = "1452470400000"
-            start = '1900-01-01T00:00:00Z'
-            end = '2017-01-01T00:00:00Z'
-            gw_info = QGisLizardImporter(username=username,
-                                         password=password,
-                                         organisation_id=organisation_id)
+            start = self.start_date.strftime('%Y-%m-%dT00:00:00Z')
+            end = self.end_date.strftime('%Y-%m-%dT00:00:00Z')
+            gw_info = QGisLizardImporter(username=self.username,
+                                         password=self.password,
+                                         organisation_id=self.selected_organisation)
 
             self.iface.messageBar().pushMessage(
                 "Lizard",
@@ -292,6 +319,7 @@ class LizardDownloader:
                 Technical debug info follows:
 
                 Username: {username}
+                Organisation ID: {organisation_id}
 
                 Start date: {start}
                 End date:   {end}
@@ -303,11 +331,8 @@ class LizardDownloader:
                 Timeseries url: {timeseries_url}
 
                 len(timeseries): {timeseries_len}
-                """.format(username=username,
-                           # y_min=y_min,
-                           # y_max=y_max,
-                           # x_min=x_min,
-                           # x_max=x_max,
+                """.format(username=self.username,
+                           organisation_id=self.selected_organisation,
                            start=start,
                            end=end,
                            locations_url=_split_url(gw_info.groundwater.locs.url),
