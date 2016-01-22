@@ -16,12 +16,14 @@ class WriteShapefileError(Exception):
 
 class QGisLizardImporter(object):
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, organisation_id):
         self.groundwater = GroundwaterTimeSeriesAndLocations()
         self.groundwater.locs.username = username
         self.groundwater.locs.password = password
+        self.groundwater.locs.organisation_id = organisation_id
         self.groundwater.ts.username = username
         self.groundwater.ts.password = password
+        self.groundwater.ts.organisation_id = organisation_id
 
     def download(self, south_west, north_east, start, end, groundwater_type):
         self.groundwater.bbox(south_west, north_east, start, end,

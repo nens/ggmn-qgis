@@ -22,9 +22,11 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon, QMessageBox
-from lizard_downloader_dialog import LizardDownloaderDialog
-from qgis.core import QgsMessageLog
 from import_timeseries import QGisLizardImporter
+from lizard_api import Organisations
+from lizard_downloader_dialog import LizardDownloaderDialog
+from login_dialog import LoginDialog
+from qgis.core import QgsMessageLog
 
 import os.path
 import resources
@@ -75,8 +77,9 @@ class LizardDownloader:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.import_dlg = LizardDownloaderDialog()
-        self.upload_dlg = LizardDownloaderDialog()  # TODO
+        self.login_dialog = LoginDialog()
+        self.import_dialog = LizardDownloaderDialog()
+        self.upload_dialog = LizardDownloaderDialog()  # TODO
 
         # Declare instance attributes
         self.actions = []
@@ -84,6 +87,10 @@ class LizardDownloader:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'LizardDownloader')
         self.toolbar.setObjectName(u'LizardDownloader')
+        # Stored username/password, will be set by the login dialog.
+        self.username = None
+        self.password = None
+        self.organisations = {}  # Will be filled after logging in.
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -178,6 +185,12 @@ class LizardDownloader:
         icon_path = ':/plugins/LizardDownloader/icon.png'
         self.add_action(
             icon_path,
+            text=self.tr(u'Log into Lizard'),
+            callback=self.run_login,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
             text=self.tr(u'Download from Lizard'),
             callback=self.run_import,
             add_to_toolbar=False,
@@ -207,23 +220,51 @@ class LizardDownloader:
         # remove the toolbar
         del self.toolbar
 
+    def determine_organisations(self):
+        if not (self.username and self.password):
+            raise RuntimeError("Not logged in")
+
+        organisations_api = Organisations()
+        organisations_api.username = self.username
+        organisations_api.password = self.password
+        return organisations_api.as_dict()
+
+    def run_login(self):
+        """Show login dialog if the user isn't logged in yet."""
+        # show the dialog
+        self.login_dialog.show()
+        ok_pressed = self.login_dialog.exec_()
+        if ok_pressed:
+            self.username = self.login_dialog.username.text()
+            self.password = self.login_dialog.password.text()
+
+        self.organisations = self.determine_organisations()
+        return ok_pressed
+
     def run_import(self):
         """Run method that performs all the real work"""
+        if not (self.username and self.password):
+            ok_pressed = self.run_login()
+            if not ok_pressed:
+                # Then we don't want to do anything either!
+                return
+
         # show the dialog
-        self.import_dlg.show()
+        self.import_dialog.show()
 
         # Run the dialog event loop
-        result = self.import_dlg.exec_()
+        result = self.import_dialog.exec_()
         # See if OK was pressed
         if result:
-            username = self.import_dlg.username.text()
-            password = self.import_dlg.password.text()
+            organisation_id = self.import_dialog.organisation_id.text()
 
             # start_js_date = "-2208988800000"
             # end_js_date = "1452470400000"
             start = '1900-01-01T00:00:00Z'
             end = '2017-01-01T00:00:00Z'
-            gw_info = QGisLizardImporter(username=username, password=password)
+            gw_info = QGisLizardImporter(username=username,
+                                         password=password,
+                                         organisation_id=organisation_id)
 
             self.iface.messageBar().pushMessage(
                 "Lizard",
@@ -282,9 +323,9 @@ class LizardDownloader:
     def run_upload(self):
         """Run method that performs all the real work"""
         # show the dialog
-        self.upload_dlg.show()
+        self.upload_dialog.show()
         # Run the dialog event loop
-        result = self.upload_dlg.exec_()
+        result = self.upload_dialog.exec_()
         # See if OK was pressed
         if result:
             pop_up_info("To be implemented")
