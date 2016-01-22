@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.8 (unreleased)
+0.8 (2016-01-22)
 ----------------
 
 - Added separate login dialog. You first have to log in before the list of
