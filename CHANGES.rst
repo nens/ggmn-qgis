@@ -4,6 +4,12 @@ GGMN Lizard qgis plugin changelog
 0.8 (unreleased)
 ----------------
 
+- Added separate login dialog. You first have to log in before the list of
+  organisations can be downloaded. And the organisation list is needed for the
+  actual download selection dialog.
+
+- Added start/end date and organisation selection to Lizard import.
+
 - Note: 0.5/0.6-0.7 were test releases for testing new release procedure.
 
 
