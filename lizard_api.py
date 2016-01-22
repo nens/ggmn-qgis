@@ -11,6 +11,7 @@ import urllib2
 ## When you use this script stand alone, please set your login information here:
 USR = None  # Replace the with your user name.
 PWD = None  # Replace the with your password.
+ORGANISATION_ID = None
 
 
 def join_urls(*args):
@@ -36,6 +37,7 @@ class Base(object):
     data_type = None
     username = USR
     password = PWD
+    organisation_id = ORGANISATION_ID
     use_header = True
     max_results = 1000
 
@@ -173,6 +175,19 @@ class Organisations(Base):
         self.get()
         self.parse()
         return self.parse_elements('unique_id')
+
+    def as_dict(self):
+        """
+        :return: a list of organisations belonging one has access to
+                (with the credentials from the header attribute)
+        """
+        self.get()
+        self.parse()
+        result = {}
+        for organisation in self.results:
+            result[organisation['unique_id']] = organisation['name']
+        print("We're a member of %s organisations" % len(result))
+        return result
 
 
 class Locations(Base):
@@ -409,7 +424,7 @@ class GroundwaterLocations(Locations):
     def extra_queries(self):
         return {
             "object_type\__model": "GroundwaterStation",
-            "organisation__unique_id": "f757d2eb6f4841b1a92d57d7e72f450c"
+            "organisation__unique_id": self.organisation_id
         }
 
 
@@ -423,7 +438,7 @@ class GroundwaterTimeSeries(TimeSeries):
     def extra_queries(self):
         return {
             "object_type\__model": "GroundwaterStation",
-            "location__organisation__unique_id": "f757d2eb6f4841b1a92d57d7e72f450c"
+            "location__organisation__unique_id": self.organisation_id
         }
 
 
