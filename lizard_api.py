@@ -186,7 +186,6 @@ class Organisations(Base):
         result = {}
         for organisation in self.results:
             result[organisation['unique_id']] = organisation['name']
-        print("We're a member of %s organisations" % len(result))
         return result
 
 
