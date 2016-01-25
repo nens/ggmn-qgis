@@ -167,33 +167,36 @@ class QGisLizardImporter(object):
 
         # Process the text file and add the attributes and features to the
         # shapefile
-        for uuid, row in self.data['values'].items():
-            # create the feature
-            feature = ogr.Feature(layer.GetLayerDefn())
-            # Set the attributes using the values from the delimited text file
-            feature.SetField("name", row['name'].encode('ascii', 'ignore'))
-            feature.SetField("loc_UUID", str(row['timeseries uuid']))
-            feature.SetField("ts_UUID", str(uuid))
-            feature.SetField("longitude", row['coordinates'][0])
-            feature.SetField("latitude", row['coordinates'][1])
-            feature.SetField("min", row['mean'])
-            # ^^^ Note: there should be only one value, ideally. I'm taking
-            # the mean, at least we'll have one value then, guaranteed. And
-            # the rest of the code can remain the same.
+        if 'values' in self.data:
+            for uuid, row in self.data['values'].items():
+                # create the feature
+                feature = ogr.Feature(layer.GetLayerDefn())
+                # Set the attributes using the values from the delimited text file
+                feature.SetField("name", row['name'].encode('ascii', 'ignore'))
+                feature.SetField("loc_UUID", str(row['timeseries uuid']))
+                feature.SetField("ts_UUID", str(uuid))
+                feature.SetField("longitude", row['coordinates'][0])
+                feature.SetField("latitude", row['coordinates'][1])
+                feature.SetField("min", row['mean'])
+                # ^^^ Note: there should be only one value, ideally. I'm taking
+                # the mean, at least we'll have one value then, guaranteed. And
+                # the rest of the code can remain the same.
 
-            # create the WKT for the feature using Python string formatting
-            wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
-                                              lat=row['coordinates'][1])
+                # create the WKT for the feature using Python string formatting
+                wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
+                                                  lat=row['coordinates'][1])
 
-            # Create the point from the Well Known Txt
-            point = ogr.CreateGeometryFromWkt(wkt)
+                # Create the point from the Well Known Txt
+                point = ogr.CreateGeometryFromWkt(wkt)
 
-            # Set the feature geometry using the point
-            feature.SetGeometry(point)
-            # Create the feature in the layer (shapefile)
-            layer.CreateFeature(feature)
-            # Destroy the feature to free resources
-            feature.Destroy()
+                # Set the feature geometry using the point
+                feature.SetGeometry(point)
+                # Create the feature in the layer (shapefile)
+                layer.CreateFeature(feature)
+                # Destroy the feature to free resources
+                feature.Destroy()
+        else:
+            print("No data. This are the keys in self.data: %r" % self.data.keys())
 
         # Destroy the data source to free resources
         data_source.Destroy()
