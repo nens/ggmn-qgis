@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.10 (unreleased)
+0.10 (2016-01-25)
 -----------------
 
 - Added dummy 'upload raster' action.
