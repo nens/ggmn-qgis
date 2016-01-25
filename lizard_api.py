@@ -478,15 +478,3 @@ class GroundwaterTimeSeriesAndLocations(object):
         self.locs_to_dict()
         self.ts.ts_to_dict(values=self.values, date_time='dt')
         return self.ts.response
-
-
-if __name__ == '__main__':
-    end="1452470400000"
-    start="-2208988800000"
-    start_time = time()
-    GWinfo = GroundwaterTimeSeriesAndLocations()
-    GWinfo.bbox(south_west=[-65.80277639340238, -223.9453125], north_east=[
-        81.46626086056541, 187.3828125], start=start, end=end)
-    x = GWinfo.results_to_dict()
-    print(time() - start_time)
-    pprint(x)
