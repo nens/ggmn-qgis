@@ -6,6 +6,8 @@ GGMN Lizard qgis plugin changelog
 
 - Added dummy 'upload raster' action.
 
+- Improved the download of organisations for the selection box.
+
 
 0.9 (2016-01-25)
 ----------------
