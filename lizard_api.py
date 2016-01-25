@@ -83,6 +83,7 @@ class Base(object):
         # A bit dirty, but store the url for later debugging.
         self.url = url
 
+        print(url)
         self.fetch(url)
         print('Number found {} : {} with URL: {}'.format(
             self.data_type, self.json.get('count', 0), url))
