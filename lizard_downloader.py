@@ -36,6 +36,10 @@ import datetime
 resources  # Pyflakes
 
 
+GROUNDWATER_TYPE = 'GWmMSL'
+CUSTOM_GROUNDWATER_TYPE = 'GWmMSLC'
+
+
 def pop_up_info(msg='', title='Information', parent=None):
     """Display an info message via Qt box"""
     QMessageBox.information(parent, title, '%s' % msg)
@@ -97,6 +101,7 @@ class LizardDownloader:
         self.start_date = datetime.date(1930, 1, 1)
         self.end_date = datetime.date.today()
         self.filename = None
+        self.custom_filename = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -201,6 +206,13 @@ class LizardDownloader:
             callback=self.run_import,
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
+        self.download_custom_points_action = self.add_action(
+            icon_path,
+            text=self.tr(u'Download custom points from Lizard'),
+            callback=self.run_custom_import,
+            enabled_flag=False,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow())
         self.add_action(
             icon_path,
             text=self.tr(u'Add custom point'),
@@ -300,7 +312,7 @@ class LizardDownloader:
             gw_info.download(
                 start=start,
                 end=end,
-                groundwater_type='GWmMSL')
+                groundwater_type=GROUNDWATER_TYPE)
             if gw_info.data:
                 if not self.filename:
                     # Take homedir as starting point
@@ -313,6 +325,7 @@ class LizardDownloader:
                 gw_info.data_to_shape(filename=self.filename,
                                       overwrite=True)
                 gw_info.load_shape(self.filename)
+                self.download_custom_points_action.setDisabled(False)
             else:
                 def _split_url(url):
                     return '\n&'.join(url.split('&'))
@@ -342,6 +355,33 @@ class LizardDownloader:
                            locations_len=len(gw_info.groundwater.locs.results),
                            timeseries_len=len(gw_info.groundwater.ts.results))
                 pop_up_info(msg=msg, title='No data found')
+                return
+
+    def run_custom_import(self):
+        start = self.start_date.strftime('%Y-%m-%dT00:00:00Z')
+        end = self.end_date.strftime('%Y-%m-%dT00:00:00Z')
+        gw_info = QGisLizardImporter(username=self.username,
+                                     password=self.password,
+                                     organisation_id=self.selected_organisation)
+
+        gw_info.download(
+            start=start,
+            end=end,
+            groundwater_type=CUSTOM_GROUNDWATER_TYPE)
+
+        # It is fine to have no data. We'll just create an empty shapefile,
+        # then.
+        if not self.custom_filename:
+            # Take homedir as starting point
+            self.filename = os.path.expanduser('~')
+        self.custom_filename = QFileDialog.getSaveFileName(
+            self.iface.mainWindow(),
+            self.tr("New shapefile to save downloaded CUSTOM data in"),
+            self.filename,
+            self.tr("Shape files (*.shp)"))
+        gw_info.data_to_custom_shape(filename=self.custom_filename,
+                                     overwrite=True)
+        gw_info.load_custom_shape(self.custom_filename)
 
     def run_add_point(self):
         """Run method that performs all the real work"""
