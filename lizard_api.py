@@ -85,8 +85,12 @@ class Base(object):
 
         print(url)
         self.fetch(url)
-        print('Number found {} : {} with URL: {}'.format(
-            self.data_type, self.json.get('count', 0), url))
+        if 'count' in self.json:
+            print('Number found {} : {} with URL: {}'.format(
+                self.data_type, self.json.get('count', 0), url))
+        else:
+            print('Number found {} : {} with URL: {}'.format(
+                self.data_type, len(self.json), url))
         self.parse()
         return self.results
 
@@ -125,20 +129,24 @@ class Base(object):
         All pages of a query are parsed. If the max_results attribute is
         exceeded an ApiError is raised.
         """
-        while True:
-            try:
-                if self.json['count'] > self.max_results:
-                    raise ApiError('Too many results: {} found, while max {} '
-                                   'are accepted'.format(
-                        self.json['count'], self.max_results))
-                self.results += self.json['results']
-                next_url = self.json.get('next')
-                if next_url:
-                    self.fetch(next_url)
-                else:
+        if 'results' in self.json:
+            while True:
+                try:
+                    if self.json['count'] > self.max_results:
+                        raise ApiError('Too many results: {} found, while max {} '
+                                       'are accepted'.format(
+                            self.json['count'], self.max_results))
+                    self.results += self.json['results']
+                    next_url = self.json.get('next')
+                    if next_url:
+                        self.fetch(next_url)
+                    else:
+                        break
+                except IndexError:
                     break
-            except IndexError:
-                break
+        else:
+            # Results aren't paginated, just return them.
+            self.results = self.json
 
     def parse_elements(self, element):
         """
@@ -162,6 +170,16 @@ class Base(object):
         return {}
 
 
+class SingleUserInfo(Base):
+    data_type = 'users'
+
+    def organisations_url(self):
+        self.get(username=self.username)
+        pprint(self.results)
+        assert len(self.results) == 1
+        return self.results[0]['organisations_url']
+
+
 class Organisations(Base):
     """
     Makes a connection to the organisations endpoint of the lizard api.
@@ -174,7 +192,6 @@ class Organisations(Base):
                 (with the credentials from the header attribute)
         """
         self.get()
-        self.parse()
         return self.parse_elements('unique_id')
 
     def for_dialog(self):
@@ -183,7 +200,6 @@ class Organisations(Base):
                 (with the credentials from the header attribute)
         """
         self.get()
-        self.parse()
         return [{'unique_id': organisation['unique_id'],
                  'name': organisation['name']} for organisation in self.results]
 

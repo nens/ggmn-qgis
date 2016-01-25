@@ -25,6 +25,7 @@ from PyQt4.QtCore import QCoreApplication, QDate
 from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
 from import_timeseries import QGisLizardImporter
 from lizard_api import Organisations
+from lizard_api import SingleUserInfo
 from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
 from qgis.core import QgsMessageLog
@@ -248,9 +249,16 @@ class LizardDownloader:
         if not (self.username and self.password):
             raise RuntimeError("Not logged in")
 
+        single_user_api = SingleUserInfo()
+        single_user_api.username = self.username
+        single_user_api.password = self.password
+        organisations_url = single_user_api.organisations_url()
+        organisations_url = organisations_url.rstrip('/')
+
         organisations_api = Organisations()
         organisations_api.username = self.username
         organisations_api.password = self.password
+        organisations_api.base_url = organisations_url
         return organisations_api.for_dialog()
 
     def run_login(self):
