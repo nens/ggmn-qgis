@@ -227,6 +227,12 @@ class LizardDownloader:
             add_to_toolbar=False,
             enabled_flag=False,
             parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Upload interpolation raster to Lizard'),
+            callback=self.run_raster_upload,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow())
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -388,7 +394,25 @@ class LizardDownloader:
         pop_up_info("To be implemented")
 
     def run_upload(self):
-        """Run method that performs all the real work"""
+        if not (self.username and self.password):
+            ok_pressed = self.run_login()
+            if not ok_pressed:
+                # Then we don't want to do anything either!
+                return
+        # show the dialog
+        self.upload_dialog.show()
+        # Run the dialog event loop
+        result = self.upload_dialog.exec_()
+        # See if OK was pressed
+        if result:
+            pop_up_info("To be implemented")
+
+    def run_raster_upload(self):
+        if not (self.username and self.password):
+            ok_pressed = self.run_login()
+            if not ok_pressed:
+                # Then we don't want to do anything either!
+                return
         # show the dialog
         self.upload_dialog.show()
         # Run the dialog event loop
