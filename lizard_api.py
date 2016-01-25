@@ -396,7 +396,7 @@ class GroundwaterLocations(Locations):
     @property
     def extra_queries(self):
         return {
-            "object_type__model": "GroundwaterStation",
+            "object_type\__model": "GroundwaterStation",
             "organisation__unique_id": self.organisation_id
         }
 
@@ -410,7 +410,7 @@ class GroundwaterTimeSeries(TimeSeries):
     @property
     def extra_queries(self):
         return {
-            "object_type__model": "GroundwaterStation",
+            "object_type\__model": "GroundwaterStation",
             "location__organisation__unique_id": self.organisation_id
         }
 
