@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-0.9 (unreleased)
+0.9 (2016-01-25)
 ----------------
 
 - Added download for virtual point layer.
