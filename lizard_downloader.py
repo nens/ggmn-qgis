@@ -298,9 +298,6 @@ class LizardDownloader:
                 "Lizard",
                 "Downloading data (can take up to a minute)...")
             gw_info.download(
-                south_west=[-65.80277639340238, -223.9453125],
-                north_east=[81.46626086056541, 187.3828125],
-                # ^^^ hardcoded
                 start=start,
                 end=end,
                 groundwater_type='GWmMSL')

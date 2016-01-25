@@ -197,20 +197,12 @@ class Locations(Base):
         self.uuids = []
         super(Locations, self).__init__()
 
-    def bbox(self, south_west, north_east):
+    def bbox(self):
         """
-        Find all locations within a certain bounding box.
-        returns records within bounding box using Bounding Box format (min Lon,
-        min Lat, max Lon, max Lat). Also returns features with overlapping
-        geometry.
-        :param south_west: lattitude and longtitude of the south-western point
-        :param north_east: lattitude and longtitude of the north-eastern point
+        Find all locations
         :return: a dictionary of the api-response.
         """
-        min_lat, min_lon = south_west
-        max_lat, max_lon = north_east
-        coords = self.commaify(min_lon, min_lat, max_lon, max_lat)
-        self.get(in_bbox=coords)
+        self.get()
 
     def distance_to_point(self, distance, lat, lon):
         """
@@ -298,15 +290,12 @@ class TimeSeries(Base):
             end = jsdt.now_iso()
         self.get(uuid=uuid, start=start, end=end)
 
-    def bbox(self, south_west, north_east, statistic=None,
-                  start='0001-01-01T00:00:00Z', end=None):
+    def bbox(self,
+             statistic=None,
+             start='0001-01-01T00:00:00Z',
+             end=None):
         """
-        Find all timeseries within a certain bounding box.
-        Returns records within bounding box using Bounding Box format (min Lon,
-        min Lat, max Lon, max Lat). Also returns features with overlapping
-        geometry.
-        :param south_west: lattitude and longtitude of the south-western point
-        :param north_east: lattitude and longtitude of the north-eastern point
+        Find
         :param start: start timestamp in ISO 8601 format
         :param end: end timestamp in ISO 8601 format
         :return: a dictionary of the api-response.
@@ -320,20 +309,7 @@ class TimeSeries(Base):
         if not end:
             end = jsdt.now_iso()
 
-        min_lat, min_lon = south_west
-        max_lat, max_lon = north_east
-
-        polygon_coordinates = [
-            [min_lon, min_lat],
-            [min_lon, max_lat],
-            [max_lon, max_lat],
-            [max_lon, min_lat],
-            [min_lon, min_lat],
-        ]
-        points = ['%20'.join([str(x), str(y)]) for x, y in polygon_coordinates]
-        geom_within = 'POLYGON%20((' + ',%20'.join(points) + '))'
-        self.get(start=start, end=end, min_points=1, fields=statistic,
-                 location__geom_within=geom_within)
+        self.get(start=start, end=end, min_points=1, fields=statistic)
 
     def ts_to_dict(self, statistic=None, values=None,
                    start_date=None, end_date=None, date_time='js'):
@@ -446,16 +422,18 @@ class GroundwaterTimeSeriesAndLocations(object):
         self.ts = GroundwaterTimeSeries()
         self.values = {}
 
-    def bbox(self, south_west, north_east, start='0001-01-01T00:00:00Z',
-             end=None, groundwater_type="GWmMSL"):
+    def bbox(self,
+             start='0001-01-01T00:00:00Z',
+             end=None,
+             groundwater_type="GWmMSL"):
         if end:
             self.end = end
         else:
             self.end = jsdt.now_iso()
         self.start = start
         self.ts.queries = {"name": groundwater_type}
-        self.locs.bbox(south_west, north_east)
-        self.ts.bbox(south_west=south_west, north_east=north_east, start=start,
+        self.locs.bbox()
+        self.ts.bbox(start=start,
                      end=self.end)
 
     def locs_to_dict(self, values=None):

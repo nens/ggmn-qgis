@@ -25,9 +25,8 @@ class QGisLizardImporter(object):
         self.groundwater.ts.password = password
         self.groundwater.ts.organisation_id = organisation_id
 
-    def download(self, south_west, north_east, start, end, groundwater_type):
-        self.groundwater.bbox(south_west, north_east, start, end,
-                              groundwater_type)
+    def download(self, start, end, groundwater_type):
+        self.groundwater.bbox(groundwater_type)
         self.data = self.groundwater.results_to_dict()
         # pprint(self.data)
 
@@ -115,23 +114,3 @@ class QGisLizardImporter(object):
         # load the shapefile
         layer = QgsVectorLayer(filename, "ggmn_groundwater", "ogr")
         QgsMapLayerRegistry.instance().addMapLayer(layer)
-
-
-if __name__ == '__main__':
-    'Example how to use: '
-
-    from freq.secretsettings import USR, PWD
-    end = "1452470400000"
-    start = "-2208988800000"
-    GWinfo = QGisLizardImporter(username=USR, password=PWD)
-    GWinfo.download(
-        south_west=[-65.80277639340238, -223.9453125],
-        north_east=[81.46626086056541, 187.3828125],
-        start=start,
-        end=end,
-        groundwater_type='GWmMSL'
-    )
-    filename='/vagrant/TeSt/test2.shp'
-    GWinfo.data_to_shape(filename,
-                         overwrite=True)
-    GWinfo.load_shape(filename)
