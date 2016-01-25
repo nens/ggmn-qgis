@@ -370,10 +370,10 @@ class TimeSeries(Base):
             'dt': jsdt.js_to_datetime,
             'str': jsdt.js_to_datestring
         }[date_time]
-        start = dt_conversion(npts_min[-2]) if not start_date else \
-            dt_conversion(max(start_date, npts_min[-2]))
-        end = dt_conversion(npts_max[-1]) if not end_date else \
-            dt_conversion(min(end_date, npts_max[-1]))
+        start = (dt_conversion(npts_min[-2]) if not start_date else
+                 dt_conversion(max(start_date, npts_min[-2])))
+        end = (dt_conversion(npts_max[-1]) if not end_date else
+               dt_conversion(min(end_date, npts_max[-1])))
         self.response = {
                 "extremes": extremes,
                 "dates": {
@@ -396,7 +396,7 @@ class GroundwaterLocations(Locations):
     @property
     def extra_queries(self):
         return {
-            "object_type\__model": "GroundwaterStation",
+            "object_type__model": "GroundwaterStation",
             "organisation__unique_id": self.organisation_id
         }
 
@@ -410,7 +410,7 @@ class GroundwaterTimeSeries(TimeSeries):
     @property
     def extra_queries(self):
         return {
-            "object_type\__model": "GroundwaterStation",
+            "object_type__model": "GroundwaterStation",
             "location__organisation__unique_id": self.organisation_id
         }
 
