@@ -1,6 +1,8 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
 from lizard_api import GroundwaterTimeSeriesAndLocations
+from lizard_api import CustomGroundwaterTimeSeriesAndLocations
+from lizard_api import DOWNLOADED_MARKER
 from pprint import pprint
 from qgis.core import QgsVectorLayer
 from qgis.core import QgsMapLayerRegistry
@@ -121,6 +123,24 @@ class QGisLizardImporter(object):
         layer = QgsVectorLayer(filename, LAYER_NAME, "ogr")
         QgsMapLayerRegistry.instance().addMapLayer(layer)
 
+
+class QGisLizardCustomImporter(object):
+
+    def __init__(self, username, password, organisation_id):
+        self.groundwater = CustomGroundwaterTimeSeriesAndLocations()
+        self.groundwater.locs.username = username
+        self.groundwater.locs.password = password
+        self.groundwater.locs.organisation_id = organisation_id
+        self.groundwater.ts.username = username
+        self.groundwater.ts.password = password
+        self.groundwater.ts.organisation_id = organisation_id
+
+    def download(self, start, end, groundwater_type):
+        self.groundwater.bbox(start=start,
+                              end=end)
+        self.data = self.groundwater.results_to_dict()
+        # pprint(self.data)
+
     def data_to_custom_shape(self, filename="ggmn_groundwater_custom.shp",
                       overwrite=False):
         # set up the shapefile driver
@@ -152,19 +172,10 @@ class QGisLizardImporter(object):
                                         spatial_reference, ogr.wkbPoint)
 
         # Add the fields
-        field_name = ogr.FieldDefn("name", ogr.OFTString)
-        field_name.SetWidth(24)
-        layer.CreateField(field_name)
-        field_loc_UUID = ogr.FieldDefn("loc_UUID", ogr.OFTString)
-        field_loc_UUID.SetWidth(36)
-        layer.CreateField(field_loc_UUID)
-        field_ts_UUID = ogr.FieldDefn("ts_UUID", ogr.OFTString)
-        field_ts_UUID.SetWidth(36)
-        layer.CreateField(field_ts_UUID)
-        layer.CreateField(ogr.FieldDefn("latitude", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("longitude", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("value", ogr.OFTReal))
-
+        internal_use_field = ogr.FieldDefn("internal_use", ogr.OFTString)
+        internal_use_field.SetWidth(10)
+        layer.CreateField(internal_use_field)
         # Process the text file and add the attributes and features to the
         # shapefile
         if 'values' in self.data:
@@ -172,15 +183,11 @@ class QGisLizardImporter(object):
                 # create the feature
                 feature = ogr.Feature(layer.GetLayerDefn())
                 # Set the attributes using the values from the delimited text file
-                feature.SetField("name", row['name'].encode('ascii', 'ignore'))
-                feature.SetField("loc_UUID", str(row['timeseries uuid']))
-                feature.SetField("ts_UUID", str(uuid))
-                feature.SetField("longitude", row['coordinates'][0])
-                feature.SetField("latitude", row['coordinates'][1])
-                feature.SetField("min", row['mean'])
+                feature.SetField("value", row['mean'])
                 # ^^^ Note: there should be only one value, ideally. I'm taking
                 # the mean, at least we'll have one value then, guaranteed. And
                 # the rest of the code can remain the same.
+                feature.SetField('internal_use', DOWNLOADED_MARKER)
 
                 # create the WKT for the feature using Python string formatting
                 wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
@@ -205,3 +212,4 @@ class QGisLizardImporter(object):
         # load the shapefile
         layer = QgsVectorLayer(filename, CUSTOM_LAYER_NAME, "ogr")
         QgsMapLayerRegistry.instance().addMapLayer(layer)
+        layer.startEditing()

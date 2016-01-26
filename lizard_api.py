@@ -13,6 +13,9 @@ USR = None  # Replace the with your user name.
 PWD = None  # Replace the with your password.
 ORGANISATION_ID = None
 
+GGMN_CUSTOM = 'GGMN_CUSTOM'
+DOWNLOADED_MARKER = 'dl'
+
 
 def join_urls(*args):
     return '/'.join(args)
@@ -432,6 +435,34 @@ class GroundwaterTimeSeries(TimeSeries):
         }
 
 
+class CustomGroundwaterLocations(Locations):
+    """
+    Makes a connection to the locations endpoint of the lizard api.
+    Only selects GroundwaterStations.
+    """
+
+    @property
+    def extra_queries(self):
+        return {
+            "name": GGMN_CUSTOM,
+            "organisation__unique_id": self.organisation_id
+        }
+
+
+class CustomGroundwaterTimeSeries(TimeSeries):
+    """
+    Makes a connection to the timeseries endpoint of the lizard api.
+    Only selects GroundwaterStations.
+    """
+
+    @property
+    def extra_queries(self):
+        return {
+            "name": GGMN_CUSTOM,
+            "location__organisation__unique_id": self.organisation_id
+        }
+
+
 class GroundwaterTimeSeriesAndLocations(object):
 
     def __init__(self):
@@ -449,6 +480,47 @@ class GroundwaterTimeSeriesAndLocations(object):
             self.end = jsdt.now_iso()
         self.start = start
         self.ts.queries = {"name": groundwater_type}
+        self.locs.bbox()
+        self.ts.bbox(start=start,
+                     end=self.end)
+
+    def locs_to_dict(self, values=None):
+        if values:
+            self.values = values
+        for loc in self.locs.results:
+            if loc['uuid'] in self.values:
+                self.values[loc['uuid']].update({
+                    'coordinates': loc['geometry']['coordinates'],
+                    'name': loc['name']
+                })
+            else:
+                self.values[loc['uuid']] = {
+                    'coordinates': loc['geometry']['coordinates'],
+                    'name': loc['name']
+                }
+        self.response = self.values
+
+    def results_to_dict(self):
+        self.locs_to_dict()
+        self.ts.ts_to_dict(values=self.values, date_time='dt')
+        return self.ts.response
+
+
+class CustomGroundwaterTimeSeriesAndLocations(object):
+
+    def __init__(self):
+        self.locs = CustomGroundwaterLocations()
+        self.ts = CustomGroundwaterTimeSeries()
+        self.values = {}
+
+    def bbox(self,
+             start='0001-01-01T00:00:00Z',
+             end=None):
+        if end:
+            self.end = end
+        else:
+            self.end = jsdt.now_iso()
+        self.start = start
         self.locs.bbox()
         self.ts.bbox(start=start,
                      end=self.end)

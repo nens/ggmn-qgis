@@ -24,6 +24,7 @@ from PyQt4.QtCore import QSettings, QTranslator, qVersion
 from PyQt4.QtCore import QCoreApplication, QDate
 from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
 from import_timeseries import QGisLizardImporter
+from import_timeseries import QGisLizardCustomImporter
 from lizard_api import Organisations
 from lizard_api import SingleUserInfo
 from lizard_downloader_dialog import LizardDownloaderDialog
@@ -374,9 +375,9 @@ class LizardDownloader:
     def run_custom_import(self):
         start = self.start_date.strftime('%Y-%m-%dT00:00:00Z')
         end = self.end_date.strftime('%Y-%m-%dT00:00:00Z')
-        gw_info = QGisLizardImporter(username=self.username,
-                                     password=self.password,
-                                     organisation_id=self.selected_organisation)
+        gw_info = QGisLizardCustomImporter(username=self.username,
+                                           password=self.password,
+                                           organisation_id=self.selected_organisation)
 
         gw_info.download(
             start=start,
