@@ -7,6 +7,7 @@ import jsdatetime as jsdt
 import json
 import numpy as np
 import urllib2
+import urllib
 
 ## When you use this script stand alone, please set your login information here:
 USR = None  # Replace the with your user name.
@@ -125,6 +126,19 @@ class Base(object):
     #         requests.post(post_url, data=json.dumps(data), headers=self.header)
     #     else:
     #         requests.post(post_url, data=json.dumps(data))
+
+    def add_new_one(self, values):
+        url = self.base_url + '/'
+        print(url)
+        data = urllib.urlencode(values)
+        pprint(data)
+        request_obj = urllib2.Request(url, data, headers=self.header)
+        response = urllib2.urlopen(request_obj)
+        content = response.read().decode('UTF-8')
+        response.close()
+        result = json.loads(content)
+        uuid = result.get('uuid') or result.get('id')
+        return uuid
 
     def parse(self):
         """
@@ -356,7 +370,6 @@ class TimeSeries(Base):
             stats1 = ('sum', 'count') if statistic == 'mean' else (statistic, )
             stats2 = ((0, statistic), )
             start_index = int(statistic == 'mean') + 1
-            end_index = start_index + 1
         npts = np.array([
             [None for y in stats1] if len(x['events']) == 0 else
             [float(x['events'][0][y]) for y in stats1] +
@@ -405,6 +418,24 @@ class TimeSeries(Base):
         # pprint(self.response)
 
         return self.response
+
+    def add_value(self,
+                  ts_id,
+                  timestamp="1970-01-01T00:00:01Z",
+                  value=None):
+        data_url = self.base_url + '/%s/data/' % ts_id
+        data = json.dumps([{'value': value,
+                            'datetime': timestamp}])
+        pprint(data_url)
+        headers = {}
+        headers.update(self.header)
+        headers['Content-Type'] = 'application/json'
+        request_obj = urllib2.Request(data_url, data, headers=headers)
+        response = urllib2.urlopen(request_obj)
+        content = response.read().decode('UTF-8')
+        response.close()
+        result = json.loads(content)
+        pprint(result)
 
 
 class GroundwaterLocations(Locations):
@@ -541,7 +572,16 @@ class CustomGroundwaterTimeSeriesAndLocations(object):
                 }
         self.response = self.values
 
-    def results_to_dict(self):
+    def results(self):
         self.locs_to_dict()
-        self.ts.ts_to_dict(values=self.values, date_time='dt')
-        return self.ts.response
+        output = {}
+
+        for timeserie in self.ts.results:
+            if not timeserie['events']:
+                continue
+            value = timeserie['last_value']
+            location_id = timeserie['location']['uuid']
+            output[location_id] = self.values[location_id]
+            output[location_id]['value'] = value
+
+        return output

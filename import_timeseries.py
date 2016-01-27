@@ -88,6 +88,11 @@ class QGisLizardImporter(object):
         # Process the text file and add the attributes and features to the
         # shapefile
         for uuid, row in self.data['values'].items():
+
+            if not 'timeseries uuid' in row:
+                # Just a location, no timeseries. Probably custom locations.
+                continue
+
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
@@ -138,7 +143,7 @@ class QGisLizardCustomImporter(object):
     def download(self, start, end, groundwater_type):
         self.groundwater.bbox(start=start,
                               end=end)
-        self.data = self.groundwater.results_to_dict()
+        self.data = self.groundwater.results()
         # pprint(self.data)
 
     def data_to_custom_shape(self, filename="ggmn_groundwater_custom.shp",
@@ -178,32 +183,29 @@ class QGisLizardCustomImporter(object):
         layer.CreateField(internal_use_field)
         # Process the text file and add the attributes and features to the
         # shapefile
-        if 'values' in self.data:
-            for uuid, row in self.data['values'].items():
-                # create the feature
-                feature = ogr.Feature(layer.GetLayerDefn())
-                # Set the attributes using the values from the delimited text file
-                feature.SetField("value", row['mean'])
-                # ^^^ Note: there should be only one value, ideally. I'm taking
-                # the mean, at least we'll have one value then, guaranteed. And
-                # the rest of the code can remain the same.
-                feature.SetField('internal', DOWNLOADED_MARKER)
+        for uuid, row in self.data.items():
+            # create the feature
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Set the attributes using the values from the delimited text file
+            feature.SetField("value", row['value'])
+            # ^^^ Note: there should be only one value, ideally. I'm taking
+            # the mean, at least we'll have one value then, guaranteed. And
+            # the rest of the code can remain the same.
+            feature.SetField('internal', DOWNLOADED_MARKER)
 
-                # create the WKT for the feature using Python string formatting
-                wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
-                                                  lat=row['coordinates'][1])
+            # create the WKT for the feature using Python string formatting
+            wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
+                                              lat=row['coordinates'][1])
 
-                # Create the point from the Well Known Txt
-                point = ogr.CreateGeometryFromWkt(wkt)
+            # Create the point from the Well Known Txt
+            point = ogr.CreateGeometryFromWkt(wkt)
 
-                # Set the feature geometry using the point
-                feature.SetGeometry(point)
-                # Create the feature in the layer (shapefile)
-                layer.CreateFeature(feature)
-                # Destroy the feature to free resources
-                feature.Destroy()
-        else:
-            print("No data. This are the keys in self.data: %r" % self.data.keys())
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Destroy the feature to free resources
+            feature.Destroy()
 
         # Destroy the data source to free resources
         data_source.Destroy()

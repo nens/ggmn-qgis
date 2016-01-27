@@ -26,8 +26,11 @@ from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
 from import_timeseries import QGisLizardCustomImporter
 from import_timeseries import QGisLizardImporter
 from lizard_api import DOWNLOADED_MARKER
+from lizard_api import GGMN_CUSTOM
+from lizard_api import Locations
 from lizard_api import Organisations
 from lizard_api import SingleUserInfo
+from lizard_api import TimeSeries
 from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
 from pprint import pprint
@@ -109,6 +112,7 @@ class LizardDownloader:
         self.filename = None
         self.custom_filename = None
         self.custom_layer = None
+        self.already_uploaded = []
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -419,9 +423,13 @@ class LizardDownloader:
             if downloaded:
                 # We only upload new stuff
                 continue
-            coordinates = feature.geometry().asPoint()
+            wkt = feature.geometry().asPoint().wellKnownText()
             # ^^^ Hope that this is in the right coordinate system.
-            to_upload.append({'coordinates': coordinates,
+            if wkt in self.already_uploaded:
+                # We already uploaded it earlier.
+                continue
+            to_upload.append({'feature': feature,
+                              'wkt': wkt,
                               'value': value})
 
         self.upload_points_dialog.number.setText(str(len(to_upload)))
@@ -430,9 +438,61 @@ class LizardDownloader:
         result = self.upload_points_dialog.exec_()
         # See if OK was pressed
         if result:
-            pprint(to_upload)
+            num_succeeded = 0
+            num_failed = 0
+            loc_api = Locations()
+            loc_api.username = self.username
+            loc_api.password = self.password
+            loc_api.organisation_id = self.selected_organisation
+            for point in to_upload:
+                values = {
+                    'name': GGMN_CUSTOM,
+                    'organisation': self.selected_organisation,
+                    'organisation_code': datetime.datetime.now().isoformat(),
+                    'ddsc_show_on_map': 'false',
+                    'access_modifier': 0,
+                    'geometry': point['wkt']}
+                try:
+                    location_uuid = loc_api.add_new_one(values)
+                except Exception as e:
+                    print(e)
+                    num_failed += 1
+                    continue
+                print("Created location with uuid %s" % location_uuid)
 
-            pop_up_info("To be implemented")
+                ts_api = TimeSeries()
+                ts_api.username = self.username
+                ts_api.password = self.password
+                ts_api.organisation_id = 'f757d2eb6f4841b1a92d57d7e72f450c'
+
+                values = {'name': GGMN_CUSTOM,
+                          'location': location_uuid,
+                          'supplier_code': datetime.datetime.now().isoformat(),
+                          'organisation_code': datetime.datetime.now().isoformat(),
+                          'access_modifier': 0,
+                          'value_type': 1,  # 1 = float
+                          'parameter_referenced_unit': CUSTOM_GROUNDWATER_TYPE,
+                      }
+                try:
+                    ts_id = ts_api.add_new_one(values)
+                except Exception as e:
+                    print(e)
+                    num_failed += 1
+                    continue
+                print("Created timeserie id=%s" % ts_id)
+
+                try:
+                    ts_api.add_value(ts_id, value=point['value'])
+                except Exception as e:
+                    print(e)
+                    num_failed += 1
+                    continue
+                self.already_uploaded.append(point['wkt'])
+
+                num_succeeded += 1
+
+            pop_up_info("%s succesfully uploaded, %s failed" % (num_succeeded,
+                                                                num_failed))
 
     def run_raster_upload(self):
         if not (self.username and self.password):
