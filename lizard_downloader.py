@@ -20,16 +20,19 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion
 from PyQt4.QtCore import QCoreApplication, QDate
+from PyQt4.QtCore import QSettings, QTranslator, qVersion
 from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
-from import_timeseries import QGisLizardImporter
 from import_timeseries import QGisLizardCustomImporter
+from import_timeseries import QGisLizardImporter
+from lizard_api import DOWNLOADED_MARKER
 from lizard_api import Organisations
 from lizard_api import SingleUserInfo
 from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
+from pprint import pprint
 from qgis.core import QgsMessageLog
+from upload_points_dialog import UploadPointsDialog
 
 import os.path
 import resources
@@ -88,6 +91,7 @@ class LizardDownloader:
         self.login_dialog = LoginDialog()
         self.import_dialog = LizardDownloaderDialog()
         self.upload_dialog = LizardDownloaderDialog()  # TODO
+        self.upload_points_dialog = UploadPointsDialog()
 
         # Declare instance attributes
         self.actions = []
@@ -216,7 +220,7 @@ class LizardDownloader:
             enabled_flag=False,
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
-        self.add_action(
+        self.upload_custom_points_action = self.add_action(
             icon_path,
             text=self.tr(u'Upload custom points to Lizard'),
             callback=self.run_upload,
@@ -394,6 +398,7 @@ class LizardDownloader:
         self.custom_layer.featureDeleted.connect(self._record_deleted_point)
         self.custom_layer.featureAdded.connect(self._record_added_point)
         self.custom_layer.attributeValueChanged.connect(self._record_changed_point)
+        self.upload_custom_points_action.setDisabled(False)
 
     def _record_deleted_point(self, id):
         print("Point %s has been deleted" % id)
@@ -406,17 +411,27 @@ class LizardDownloader:
         print("Point %s has been changed" % id)
 
     def run_upload(self):
-        if not (self.username and self.password):
-            ok_pressed = self.run_login()
-            if not ok_pressed:
-                # Then we don't want to do anything either!
-                return
-        # show the dialog
-        self.upload_dialog.show()
+        to_upload = []
+        for feature in self.custom_layer.getFeatures():
+            attrs = feature.attributes()
+            value = attrs[0]
+            downloaded = bool(attrs[1] == DOWNLOADED_MARKER)
+            if downloaded:
+                # We only upload new stuff
+                continue
+            coordinates = feature.geometry().asPoint()
+            # ^^^ Hope that this is in the right coordinate system.
+            to_upload.append({'coordinates': coordinates,
+                              'value': value})
+
+        self.upload_points_dialog.number.setText(str(len(to_upload)))
+        self.upload_points_dialog.show()
         # Run the dialog event loop
-        result = self.upload_dialog.exec_()
+        result = self.upload_points_dialog.exec_()
         # See if OK was pressed
         if result:
+            pprint(to_upload)
+
             pop_up_info("To be implemented")
 
     def run_raster_upload(self):

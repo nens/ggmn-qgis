@@ -13,7 +13,7 @@ USR = None  # Replace the with your user name.
 PWD = None  # Replace the with your password.
 ORGANISATION_ID = None
 
-GGMN_CUSTOM = 'GGMN_CUSTOM'
+GGMN_CUSTOM = 'GGMN_CUSTOM_DEV'
 DOWNLOADED_MARKER = 'dl'
 
 

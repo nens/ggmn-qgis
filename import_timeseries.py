@@ -173,7 +173,7 @@ class QGisLizardCustomImporter(object):
 
         # Add the fields
         layer.CreateField(ogr.FieldDefn("value", ogr.OFTReal))
-        internal_use_field = ogr.FieldDefn("internal_use", ogr.OFTString)
+        internal_use_field = ogr.FieldDefn("internal", ogr.OFTString)
         internal_use_field.SetWidth(10)
         layer.CreateField(internal_use_field)
         # Process the text file and add the attributes and features to the
@@ -187,7 +187,7 @@ class QGisLizardCustomImporter(object):
                 # ^^^ Note: there should be only one value, ideally. I'm taking
                 # the mean, at least we'll have one value then, guaranteed. And
                 # the rest of the code can remain the same.
-                feature.SetField('internal_use', DOWNLOADED_MARKER)
+                feature.SetField('internal', DOWNLOADED_MARKER)
 
                 # create the WKT for the feature using Python string formatting
                 wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
@@ -209,7 +209,9 @@ class QGisLizardCustomImporter(object):
         data_source.Destroy()
 
     def load_custom_shape(self, filename):
+        """Load the shapefile created above and return the layer"""
         # load the shapefile
         layer = QgsVectorLayer(filename, CUSTOM_LAYER_NAME, "ogr")
         QgsMapLayerRegistry.instance().addMapLayer(layer)
         layer.startEditing()
+        return layer
