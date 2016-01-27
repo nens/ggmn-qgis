@@ -4,7 +4,7 @@ GGMN Lizard qgis plugin changelog
 0.11 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Uploading new custom points works!
 
 
 0.10 (2016-01-25)
