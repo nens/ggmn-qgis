@@ -104,6 +104,7 @@ class LizardDownloader:
         self.end_date = datetime.date.today()
         self.filename = None
         self.custom_filename = None
+        self.custom_layer = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -214,13 +215,6 @@ class LizardDownloader:
             callback=self.run_custom_import,
             enabled_flag=False,
             add_to_toolbar=False,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            icon_path,
-            text=self.tr(u'Add custom point'),
-            callback=self.run_add_point,
-            add_to_toolbar=True,
-            enabled_flag=False,
             parent=self.iface.mainWindow())
         self.add_action(
             icon_path,
@@ -396,11 +390,20 @@ class LizardDownloader:
             self.tr("Shape files (*.shp)"))
         gw_info.data_to_custom_shape(filename=self.custom_filename,
                                      overwrite=True)
-        gw_info.load_custom_shape(self.custom_filename)
+        self.custom_layer = gw_info.load_custom_shape(self.custom_filename)
+        self.custom_layer.featureDeleted.connect(self._record_deleted_point)
+        self.custom_layer.featureAdded.connect(self._record_added_point)
+        self.custom_layer.attributeValueChanged.connect(self._record_changed_point)
 
-    def run_add_point(self):
-        """Run method that performs all the real work"""
-        pop_up_info("To be implemented")
+    def _record_deleted_point(self, id):
+        print("Point %s has been deleted" % id)
+
+    def _record_added_point(self, id):
+        print("Point %s has been added" % id)
+
+    def _record_changed_point(self, id, index, dont_care):
+        # QgsFeatureId fid, int idx, const QVariant &
+        print("Point %s has been changed" % id)
 
     def run_upload(self):
         if not (self.username and self.password):
