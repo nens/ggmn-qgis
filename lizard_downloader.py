@@ -231,10 +231,11 @@ class LizardDownloader:
             add_to_toolbar=False,
             enabled_flag=False,
             parent=self.iface.mainWindow())
-        self.add_action(
+        self.upload_raster_action = self.add_action(
             icon_path,
             text=self.tr(u'Upload interpolation raster to Lizard'),
             callback=self.run_raster_upload,
+            enabled_flag=False,
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
@@ -343,6 +344,7 @@ class LizardDownloader:
                                       overwrite=True)
                 gw_info.load_shape(self.filename)
                 self.download_custom_points_action.setDisabled(False)
+                self.upload_raster_action.setDisabled(False)
             else:
                 def _split_url(url):
                     return '\n&'.join(url.split('&'))
