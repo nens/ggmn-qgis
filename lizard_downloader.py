@@ -40,10 +40,12 @@ from qgis.core import QgsRasterLayer
 from qgis.core import QgsRasterFileWriter
 from upload_points_dialog import UploadPointsDialog
 
+import datetime
 import os.path
 import resources
-import datetime
 import tempfile
+import urllib2
+import urllib2_upload
 
 resources  # Pyflakes
 
@@ -525,14 +527,25 @@ class LizardDownloader:
                                 layer.crs())
         # ^^^ http://gis.stackexchange.com/a/143020/1164
 
-        print("Wrote temporary geotiff: %s" % tiff_file)
-        pop_up_info("Wrote tiff: %s" % tiff_file)
+        # Optionally TODO: grab title from dialog.
+        title = "Uploaded by the qgis plugin on %s" % (
+            datetime.datetime.now().isoformat())
 
+        form = urllib2_upload.MultiPartForm()
+        form.add_field('title', title)
+        form.add_field('organisation_id', str(self.selected_organisation))
+        filename = os.path.basename(tiff_file)
+        form.add_file('raster_file', filename, fileHandle=open(tiff_file))
 
-        # show the dialog
-        # self.upload_dialog.show()
-        # Run the dialog event loop
-        # result = self.upload_dialog.exec_()
-        # See if OK was pressed
-        # if result:
-        #    pop_up_info("To be implemented")
+        request = urllib2.Request('https://ggmn.staging.lizard.net/upload_raster/')
+        request.add_header('User-agent', 'qgis ggmn uploader')
+        request.add_header('username', self.username)
+        request.add_header('password', self.password)
+        body = str(form)
+        request.add_header('Content-type', form.get_content_type())
+        request.add_header('Content-length', len(body))
+        request.add_data(body)
+        answer = urllib2.urlopen(request).read()
+        print(answer)
+        print("Uploaded geotiff to the server")
+        pop_up_info("Uploaded geotiff to the server")
