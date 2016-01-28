@@ -4,7 +4,7 @@ GGMN Lizard qgis plugin changelog
 0.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Uploading raster to the server works.
 
 
 0.11 (2016-01-27)
