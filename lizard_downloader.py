@@ -35,11 +35,15 @@ from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
 from pprint import pprint
 from qgis.core import QgsMessageLog
+from qgis.core import QgsRasterPipe
+from qgis.core import QgsRasterLayer
+from qgis.core import QgsRasterFileWriter
 from upload_points_dialog import UploadPointsDialog
 
 import os.path
 import resources
 import datetime
+import tempfile
 
 resources  # Pyflakes
 
@@ -235,7 +239,8 @@ class LizardDownloader:
             icon_path,
             text=self.tr(u'Upload interpolation raster to Lizard'),
             callback=self.run_raster_upload,
-            enabled_flag=False,
+            enabled_flag=True,
+            # ^^^^^^^^^ TODO, set to disabled after testing!
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
@@ -497,15 +502,37 @@ class LizardDownloader:
                                                                 num_failed))
 
     def run_raster_upload(self):
-        if not (self.username and self.password):
-            ok_pressed = self.run_login()
-            if not ok_pressed:
-                # Then we don't want to do anything either!
-                return
+        # The selected layer should be a raster layer.
+        layer = self.iface.activeLayer()
+        if not isinstance(layer, QgsRasterLayer):
+            pop_up_info("Error: you must select the raster layer")
+            return
+
+        dont_care, tiff_file = tempfile.mkstemp(suffix='.tiff')
+        extent = layer.extent()
+        width, height = layer.width(), layer.height()
+        renderer = layer.renderer()
+        provider = layer.dataProvider()
+        # crs = layer.crs().toWkt()
+        pipe = QgsRasterPipe()
+        pipe.set(provider.clone())
+        pipe.set(renderer.clone())
+        file_writer = QgsRasterFileWriter(tiff_file)
+        file_writer.writeRaster(pipe,
+                                width,
+                                height,
+                                extent,
+                                layer.crs())
+        # ^^^ http://gis.stackexchange.com/a/143020/1164
+
+        print("Wrote temporary geotiff: %s" % tiff_file)
+        pop_up_info("Wrote tiff: %s" % tiff_file)
+
+
         # show the dialog
-        self.upload_dialog.show()
+        # self.upload_dialog.show()
         # Run the dialog event loop
-        result = self.upload_dialog.exec_()
+        # result = self.upload_dialog.exec_()
         # See if OK was pressed
-        if result:
-            pop_up_info("To be implemented")
+        # if result:
+        #    pop_up_info("To be implemented")
