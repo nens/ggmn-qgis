@@ -463,7 +463,7 @@ class LizardDownloader:
                 ts_api = TimeSeries()
                 ts_api.username = self.username
                 ts_api.password = self.password
-                ts_api.organisation_id = 'f757d2eb6f4841b1a92d57d7e72f450c'
+                ts_api.organisation_id = self.selected_organisation
 
                 values = {'name': GGMN_CUSTOM,
                           'location': location_uuid,
