@@ -511,21 +511,17 @@ class LizardDownloader:
             return
 
         dont_care, tiff_file = tempfile.mkstemp(suffix='.tiff')
-        extent = layer.extent()
-        width, height = layer.width(), layer.height()
-        renderer = layer.renderer()
         provider = layer.dataProvider()
-        # crs = layer.crs().toWkt()
         pipe = QgsRasterPipe()
         pipe.set(provider.clone())
-        pipe.set(renderer.clone())
         file_writer = QgsRasterFileWriter(tiff_file)
         file_writer.writeRaster(pipe,
-                                width,
-                                height,
-                                extent,
-                                layer.crs())
-        # ^^^ http://gis.stackexchange.com/a/143020/1164
+                                provider.xSize(),
+                                provider.ySize(),
+                                provider.extent(),
+                                provider.crs())
+        # http://build-failed.blogspot.nl/2014/12/splitting-vector-and-raster-files-in.html
+        print(tiff_file)
 
         # Optionally TODO: grab title from dialog.
         title = "Uploaded by the qgis plugin on %s" % (
