@@ -99,7 +99,6 @@ class LizardDownloader:
         # Create the dialog (after translation) and keep reference
         self.login_dialog = LoginDialog()
         self.import_dialog = LizardDownloaderDialog()
-        self.upload_dialog = LizardDownloaderDialog()  # TODO
         self.upload_points_dialog = UploadPointsDialog()
 
         # Declare instance attributes
@@ -241,8 +240,7 @@ class LizardDownloader:
             icon_path,
             text=self.tr(u'Upload interpolation raster to Lizard'),
             callback=self.run_raster_upload,
-            enabled_flag=True,
-            # ^^^^^^^^^ TODO, set to disabled after testing!
+            enabled_flag=False,
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
