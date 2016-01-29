@@ -519,6 +519,8 @@ class GroundwaterTimeSeriesAndLocations(object):
         if values:
             self.values = values
         for loc in self.locs.results:
+            if not loc['geometry']:
+                continue
             if loc['uuid'] in self.values:
                 self.values[loc['uuid']].update({
                     'coordinates': loc['geometry']['coordinates'],
@@ -560,6 +562,8 @@ class CustomGroundwaterTimeSeriesAndLocations(object):
         if values:
             self.values = values
         for loc in self.locs.results:
+            if not loc['geometry']:
+                continue
             if loc['uuid'] in self.values:
                 self.values[loc['uuid']].update({
                     'coordinates': loc['geometry']['coordinates'],

@@ -92,7 +92,10 @@ class QGisLizardImporter(object):
             if not 'timeseries uuid' in row:
                 # Just a location, no timeseries. Probably custom locations.
                 continue
-
+            if not 'name' in row:
+                # Just a timeseries, no location. Probably location without
+                # geometry.
+                continue
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
