@@ -508,18 +508,21 @@ class LizardDownloader:
             pop_up_info("Error: you must select the raster layer")
             return
 
-        dont_care, tiff_file = tempfile.mkstemp(suffix='.tiff')
+        fd, tiff_filename = tempfile.mkstemp(suffix='.tiff')
+        os.close(fd)
+        # ^^^ We just want the filename, not the opened file descriptor.
+
         provider = layer.dataProvider()
         pipe = QgsRasterPipe()
         pipe.set(provider.clone())
-        file_writer = QgsRasterFileWriter(tiff_file)
+        file_writer = QgsRasterFileWriter(tiff_filename)
         file_writer.writeRaster(pipe,
                                 provider.xSize(),
                                 provider.ySize(),
                                 provider.extent(),
                                 provider.crs())
         # http://build-failed.blogspot.nl/2014/12/splitting-vector-and-raster-files-in.html
-        print(tiff_file)
+        print(tiff_filename)
 
         # Optionally TODO: grab title from dialog.
         title = "Uploaded by the qgis plugin on %s" % (
@@ -528,8 +531,8 @@ class LizardDownloader:
         form = urllib2_upload.MultiPartForm()
         form.add_field('title', title)
         form.add_field('organisation_id', str(self.selected_organisation))
-        filename = os.path.basename(tiff_file)
-        form.add_file('raster_file', filename, fileHandle=open(tiff_file))
+        filename = os.path.basename(tiff_filename)
+        form.add_file('raster_file', filename, fileHandle=open(tiff_filename))
 
         request = urllib2.Request('https://ggmn.staging.lizard.net/upload_raster/')
         request.add_header('User-agent', 'qgis ggmn uploader')
