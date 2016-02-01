@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.3 (unreleased)
+1.3 (2016-02-01)
 ----------------
 
 - Opening tiff in binary mode: fixes windows problem.
