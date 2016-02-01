@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.2 (unreleased)
+1.2 (2016-02-01)
 ----------------
 
 - Trying to get uploads from windows right.

@@ -541,12 +541,11 @@ class LizardDownloader:
         body = str(form)
         request.add_header('Content-type', form.get_content_type())
         request.add_header('Content-length', len(body))
-        print("content-length: %s" len(body))
+        print("content-length: %s" % len(body))
         request.add_data(body)
 
         fd2, logfile = tempfile.mkstemp(prefix="uploadlog", suffix=".txt")
-        os.fdopen(fd2).write(request.get_data())
-        os.close(fd2)
+        open(logfile, 'w').write(request.get_data())
         print("Printed what we'll send to %s" % logfile)
 
         answer = urllib2.urlopen(request).read()
