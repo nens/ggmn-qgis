@@ -532,7 +532,7 @@ class LizardDownloader:
         form.add_field('title', title)
         form.add_field('organisation_id', str(self.selected_organisation))
         filename = os.path.basename(tiff_filename)
-        form.add_file('raster_file', filename, fileHandle=open(tiff_filename))
+        form.add_file('raster_file', filename, fileHandle=open(tiff_filename, 'rb'))
 
         request = urllib2.Request('https://ggmn.staging.lizard.net/upload_raster/')
         request.add_header('User-agent', 'qgis ggmn uploader')
