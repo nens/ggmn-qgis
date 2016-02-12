@@ -25,12 +25,12 @@ from PyQt4.QtCore import QSettings, QTranslator, qVersion
 from PyQt4.QtGui import QAction, QIcon, QMessageBox, QFileDialog
 from import_timeseries import QGisLizardCustomImporter
 from import_timeseries import QGisLizardImporter
-from lizard_api import DOWNLOADED_MARKER
-from lizard_api import GGMN_CUSTOM
-from lizard_api import Locations
-from lizard_api import Organisations
-from lizard_api import SingleUserInfo
-from lizard_api import TimeSeries
+from lizard_connector import DOWNLOADED_MARKER
+from lizard_connector import GGMN_CUSTOM
+from lizard_connector import Locations
+from lizard_connector import Organisations
+from lizard_connector import SingleUserInfo
+from lizard_connector import TimeSeries
 from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
 from pprint import pprint

@@ -1,8 +1,8 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
-from lizard_api import GroundwaterTimeSeriesAndLocations
-from lizard_api import CustomGroundwaterTimeSeriesAndLocations
-from lizard_api import DOWNLOADED_MARKER
+from lizard_connector import GroundwaterTimeSeriesAndLocations
+from lizard_connector import CustomGroundwaterTimeSeriesAndLocations
+from lizard_connector import DOWNLOADED_MARKER
 from pprint import pprint
 from qgis.core import QgsVectorLayer
 from qgis.core import QgsMapLayerRegistry
