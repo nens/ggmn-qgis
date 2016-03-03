@@ -4,7 +4,7 @@ GGMN Lizard qgis plugin changelog
 1.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fixed layer names: include 'bgs' in the name.
 
 
 1.3 (2016-02-01)
