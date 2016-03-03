@@ -1,7 +1,6 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
 from pprint import pprint  # left here for debugging purposes
-from time import time
 
 import jsdatetime as jsdt
 import json
@@ -152,7 +151,7 @@ class Base(object):
                     if self.json['count'] > self.max_results:
                         raise ApiError('Too many results: {} found, while max {} '
                                        'are accepted'.format(
-                            self.json['count'], self.max_results))
+                                           self.json['count'], self.max_results))
                     self.results += self.json['results']
                     next_url = self.json.get('next')
                     if next_url:
@@ -266,8 +265,8 @@ class Locations(Base):
         for x in self.results:
             if x['uuid'] not in self.uuids:
                 result[x['uuid']] = {
-                        'coordinates': x['geometry']['coordinates'],
-                        'name': x['name']
+                    'coordinates': x['geometry']['coordinates'],
+                    'name': x['name']
                 }
                 self.uuids.append(x['uuid'])
         return result
@@ -281,7 +280,7 @@ class TimeSeries(Base):
 
     def __init__(self, base="http://ggmn.un-igrac.org"):
         self.uuids = []
-        self.statistic = None
+        self.statistic = ['min', 'max', 'count', 'sum']
         super(TimeSeries, self).__init__()
 
     def location_name(self, name):
@@ -325,28 +324,18 @@ class TimeSeries(Base):
         self.get(uuid=uuid, start=start, end=end)
 
     def bbox(self,
-             statistic=None,
              start='0001-01-01T00:00:00Z',
              end=None):
-        """
-        Find
-        :param start: start timestamp in ISO 8601 format
-        :param end: end timestamp in ISO 8601 format
-        :return: a dictionary of the api-response.
-        """
-        if statistic == 'mean':
-            statistic = ['count', 'sum']
-            self.statistic = statistic
-        if not statistic:
-            statistic = ['min', 'max', 'count', 'sum']
-            self.statistic = None
-        if not end:
-            end = jsdt.now_iso()
-
-        self.get(start=start, end=end, min_points=1, fields=statistic)
+        self.get(start=start, end=end, min_points=1, fields=self.statistic)
 
     def ts_to_dict(self, statistic=None, values=None,
                    start_date=None, end_date=None, date_time='js'):
+        """
+        :param date_time: default: js. Several options:
+            'js': javascript integer datetime representation
+            'dt': python datetime object
+            'str': date in date format (dutch representation)
+        """
         """
         :param date_time: default: js. Several options:
             'js': javascript integer datetime representation
@@ -358,65 +347,45 @@ class TimeSeries(Base):
             return self.response
         if not values:
             values = {}
-        if not statistic and self.statistic:
-            statistic = self.statistic
 
-        # np array with cols: 'min', 'max', 'sum', 'count', 'first', 'last'
-        if not statistic:
-            stats1 = ('min', 'max', 'sum', 'count')
-            stats2 = ((0, 'min'), (1, 'max'), (2, 'range'), (3, 'mean'))
-            start_index, end_index = 4, 5
-        else:
-            stats1 = ('sum', 'count') if statistic == 'mean' else (statistic, )
-            stats2 = ((0, statistic), )
-            start_index = int(statistic == 'mean') + 1
-        npts = np.array([
-            [None for y in stats1] if len(x['events']) == 0 else
-            [float(x['events'][0][y]) for y in stats1] +
-            [int(x['first_value_timestamp']), int(x['last_value_timestamp'])]
-            for x in self.results
-        ])
-        if statistic:
-            npts_calculated = np.hstack((
-                (npts[:, 0] / npts[:, 1]).reshape(-1, 1) if statistic == "mean"
-                    else npts[:, 0].reshape(-1, 1),
-                npts[:, slice(start_index, -1)]
-            ))
-        else:
-            npts_calculated = np.hstack((
-                npts[:, 0:2], (npts[:, 1] - npts[:, 0]).reshape(-1, 1),
-                (npts[:, 2] / npts[:, 3]).reshape(-1, 1), npts[:, 4:]
-            ))
+        stats1 = ('min', 'max', 'sum', 'count')
+        stats2 = (
+            (0, 'min'),
+            (1, 'max'),
+            (2, 'mean'),
+        )
+
+        ts = []
+        for result in self.results:
+            try:
+                timestamps = [int(result['first_value_timestamp']),
+                              int(result['last_value_timestamp'])]
+            except ValueError:
+                timestamps = [np.nan, np.nan]
+            if not len(result['events']):
+                y = 2 if statistic == 'difference (mean last - first year)' \
+                    else 0
+                ts.append([np.nan for _ in range(len(stats1) + y)] + timestamps)
+            else:
+                ts.append([float(result['events'][0][s]) for s in stats1] +
+                          timestamps)
+        npts = np.array(ts)
+        npts_calculated = np.hstack((
+            npts[:, 0:2],
+            (npts[:, 2] / npts[:, 3]).reshape(-1, 1),
+            npts[:, 3:]
+        ))
 
         for i, row in enumerate(npts_calculated):
             location_uuid = self.results[i]['location']['uuid']
             loc_dict = values.get(location_uuid, {})
-            loc_dict.update({stat: row[i] for i, stat in stats2})
-            loc_dict['timeseries uuid'] = self.results[i]['uuid']
+            loc_dict.update({stat: 'NaN' if np.isnan(row[i]) else row[i]
+                             for i, stat in stats2})
+            loc_dict['timeseries_uuid'] = self.results[i]['uuid']
             values[location_uuid] = loc_dict
-        npts_min = npts_calculated.min(0)
-        npts_max = npts_calculated.max(0)
-        extremes = {stat: {'min': npts_min[i], 'max': npts_max[i]}
-                    for i, stat in stats2}
-        dt_conversion = {
-            'js': lambda x: x,
-            'dt': jsdt.js_to_datetime,
-            'str': jsdt.js_to_datestring
-        }[date_time]
-        start = (dt_conversion(npts_min[-2]) if not start_date else
-                 dt_conversion(max(start_date, npts_min[-2])))
-        end = (dt_conversion(npts_max[-1]) if not end_date else
-               dt_conversion(min(end_date, npts_max[-1])))
         self.response = {
-                "extremes": extremes,
-                "dates": {
-                    "start": start,
-                    "end": end
-                },
-                "values": values
-            }
-        # pprint(self.response)
-
+            "values": values
+        }
         return self.response
 
     def add_value(self,
