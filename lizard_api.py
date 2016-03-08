@@ -52,10 +52,10 @@ class Base(object):
         """
         return {}
 
-    def __init__(self, base="https://ggmn.un-igrac.org"):
+    def __init__(self, base="https://ggmn.lizard.net"):
         """
         :param base: the site one wishes to connect to. Defaults to the
-                     Lizard staging site.
+                     Lizard production site.
         """
         self.queries = {}
         self.results = []
