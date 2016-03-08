@@ -355,7 +355,7 @@ class TimeSeries(Base):
             try:
                 timestamps = [int(result['first_value_timestamp']),
                               int(result['last_value_timestamp'])]
-            except ValueError:
+            except (ValueError, TypeError):
                 timestamps = [np.nan, np.nan]
             if not len(result['events']):
                 ts.append([np.nan for _ in range(len(stats1))] + timestamps)
@@ -466,7 +466,7 @@ class GroundwaterTimeSeriesAndLocations(object):
     def bbox(self,
              start='0001-01-01T00:00:00Z',
              end=None,
-             groundwater_type="GWmMSL"):
+             groundwater_type="GWmBGS"):
         if end:
             self.end = end
         else:
