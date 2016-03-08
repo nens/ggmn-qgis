@@ -12,8 +12,8 @@ import osgeo.ogr as ogr
 import osgeo.osr as osr
 
 
-LAYER_NAME = "ggmn_groundwater_bgs"
-CUSTOM_LAYER_NAME = "ggmn_groundwater_bgs_virtual"
+LAYER_NAME = "ggmn_groundwater_msl"
+CUSTOM_LAYER_NAME = "ggmn_groundwater_msl_virtual"
 
 
 class WriteShapefileError(Exception):
