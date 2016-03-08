@@ -357,9 +357,7 @@ class TimeSeries(Base):
             except ValueError:
                 timestamps = [np.nan, np.nan]
             if not len(result['events']):
-                y = 2 if statistic == 'difference (mean last - first year)' \
-                    else 0
-                ts.append([np.nan for _ in range(len(stats1) + y)] + timestamps)
+                ts.append([np.nan for _ in range(len(stats1))] + timestamps)
             else:
                 ts.append([float(result['events'][0][s]) for s in stats1] +
                           timestamps)
