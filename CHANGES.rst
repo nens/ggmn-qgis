@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.4 (unreleased)
+1.4 (2016-03-08)
 ----------------
 
 - Fixed layer names: include 'msl' in the name.
