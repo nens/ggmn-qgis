@@ -10,6 +10,9 @@ GGMN Lizard qgis plugin changelog
 
 - Fixed numpy errors.
 
+- Using new production site for both data download (https://ggmn.lizard.net)
+  and raster upload (https://ggmn.un-igrac.org).
+
 
 1.3 (2016-02-01)
 ----------------
