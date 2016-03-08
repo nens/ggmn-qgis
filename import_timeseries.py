@@ -90,11 +90,12 @@ class QGisLizardImporter(object):
         for uuid, row in self.data['values'].items():
 
             if not 'timeseries uuid' in row:
-                # Just a location, no timeseries. Probably custom locations.
+                print("Just a location, no timeseries. "
+                      "Probably custom locations: %r" % row)
                 continue
             if not 'name' in row:
-                # Just a timeseries, no location. Probably location without
-                # geometry.
+                print("Just a timeseries, no location. Probably location "
+                      "without geometry: %r" % row)
                 continue
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
