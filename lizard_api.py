@@ -336,12 +336,6 @@ class TimeSeries(Base):
             'dt': python datetime object
             'str': date in date format (dutch representation)
         """
-        """
-        :param date_time: default: js. Several options:
-            'js': javascript integer datetime representation
-            'dt': python datetime object
-            'str': date in date format (dutch representation)
-        """
         if len(self.results) == 0:
             self.response = {}
             return self.response
