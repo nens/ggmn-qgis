@@ -4,7 +4,11 @@ GGMN Lizard qgis plugin changelog
 1.4 (unreleased)
 ----------------
 
-- Fixed layer names: include 'bgs' in the name.
+- Fixed layer names: include 'msl' in the name.
+
+- Using 'mean sea level' instead of 'below ground surface'.
+
+- Fixed numpy errors.
 
 
 1.3 (2016-02-01)
