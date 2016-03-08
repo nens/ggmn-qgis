@@ -83,13 +83,13 @@ class QGisLizardImporter(object):
         layer.CreateField(ogr.FieldDefn("min", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("mean", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("max", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("range", ogr.OFTReal))
+        # layer.CreateField(ogr.FieldDefn("range", ogr.OFTReal))
 
         # Process the text file and add the attributes and features to the
         # shapefile
         for uuid, row in self.data['values'].items():
 
-            if not 'timeseries uuid' in row:
+            if not 'timeseries_uuid' in row:
                 print("Just a location, no timeseries. "
                       "Probably custom locations: %r" % row)
                 continue
@@ -101,14 +101,14 @@ class QGisLizardImporter(object):
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
             feature.SetField("name", row['name'].encode('ascii', 'ignore'))
-            feature.SetField("loc_UUID", str(row['timeseries uuid']))
+            feature.SetField("loc_UUID", str(row['timeseries_uuid']))
             feature.SetField("ts_UUID", str(uuid))
             feature.SetField("longitude", row['coordinates'][0])
             feature.SetField("latitude", row['coordinates'][1])
             feature.SetField("min", row['min'])
             feature.SetField("mean", row['mean'])
             feature.SetField("max", row['max'])
-            feature.SetField("range", row['range'])
+            # feature.SetField("range", row['range'])
 
             # create the WKT for the feature using Python string formatting
             wkt = "POINT({lon} {lat})".format(lon=row['coordinates'][0],
