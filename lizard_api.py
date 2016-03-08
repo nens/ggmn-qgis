@@ -340,6 +340,7 @@ class TimeSeries(Base):
             self.response = {}
             return self.response
         if not values:
+            print("No values passed on, using an empty dict")
             values = {}
 
         stats1 = ('min', 'max', 'sum', 'count')
@@ -350,11 +351,13 @@ class TimeSeries(Base):
         )
 
         ts = []
+        print("self.results: %s" % self.results)
         for result in self.results:
             try:
                 timestamps = [int(result['first_value_timestamp']),
                               int(result['last_value_timestamp'])]
             except ValueError:
+                print("No first/last_value_timestamp")
                 timestamps = [np.nan, np.nan]
             if not len(result['events']):
                 ts.append([np.nan for _ in range(len(stats1))] + timestamps)
