@@ -3,7 +3,7 @@ __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 from lizard_api import GroundwaterTimeSeriesAndLocations
 from lizard_api import CustomGroundwaterTimeSeriesAndLocations
 from lizard_api import DOWNLOADED_MARKER
-from pprint import pprint
+# from pprint import pprint
 from qgis.core import QgsVectorLayer
 from qgis.core import QgsMapLayerRegistry
 
@@ -42,10 +42,10 @@ class QGisLizardImporter(object):
                       overwrite=False):
         # set up the shapefile driver
         driver = ogr.GetDriverByName("ESRI Shapefile")
-        print("Driver: %s" % driver)
+        # print("Driver: %s" % driver)
 
         # create the data source
-        print("File location: %r" % filename)
+        # print("File location: %r" % filename)
 
         if os.path.exists(filename):
             if overwrite:
@@ -55,7 +55,7 @@ class QGisLizardImporter(object):
                     "File %s already exists, remove/rename it first" % filename)
 
         data_source = driver.CreateDataSource(filename)
-        print("data_source: %r" % data_source)
+        # print("data_source: %r" % data_source)
         if data_source is None:
             raise WriteShapefileError(
                 "Could not create shapefile %s" % filename)
@@ -90,12 +90,12 @@ class QGisLizardImporter(object):
         for uuid, row in self.data['values'].items():
 
             if not 'timeseries_uuid' in row:
-                print("Just a location, no timeseries. "
-                      "Probably custom locations: %r" % row)
+                # print("Just a location, no timeseries. "
+                #       "Probably custom locations: %r" % row)
                 continue
             if not 'name' in row:
-                print("Just a timeseries, no location. Probably location "
-                      "without geometry: %r" % row)
+                # print("Just a timeseries, no location. Probably location "
+                #       "without geometry: %r" % row)
                 continue
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
@@ -154,10 +154,10 @@ class QGisLizardCustomImporter(object):
                       overwrite=False):
         # set up the shapefile driver
         driver = ogr.GetDriverByName("ESRI Shapefile")
-        print("Driver: %s" % driver)
+        # print("Driver: %s" % driver)
 
         # create the data source
-        print("File location: %r" % filename)
+        # print("File location: %r" % filename)
 
         if os.path.exists(filename):
             if overwrite:
@@ -167,7 +167,7 @@ class QGisLizardCustomImporter(object):
                     "File %s already exists, remove/rename it first" % filename)
 
         data_source = driver.CreateDataSource(filename)
-        print("data_source: %r" % data_source)
+        # print("data_source: %r" % data_source)
         if data_source is None:
             raise WriteShapefileError(
                 "Could not create shapefile %s" % filename)

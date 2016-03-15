@@ -91,10 +91,10 @@ if __name__ == '__main__':
     request.add_header('Content-length', len(body))
     request.add_data(body)
 
-    print
-    print 'OUTGOING DATA:'
-    print request.get_data()
-
-    print
-    print 'SERVER RESPONSE:'
-    print urllib2.urlopen(request).read()
+    # print
+    # print 'OUTGOING DATA:'
+    # print request.get_data()
+    #
+    # print
+    # print 'SERVER RESPONSE:'
+    # print urllib2.urlopen(request).read()

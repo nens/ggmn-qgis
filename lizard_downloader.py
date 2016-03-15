@@ -33,7 +33,7 @@ from lizard_api import SingleUserInfo
 from lizard_api import TimeSeries
 from lizard_downloader_dialog import LizardDownloaderDialog
 from login_dialog import LoginDialog
-from pprint import pprint
+# from pprint import pprint
 from qgis.core import QgsMessageLog
 from qgis.core import QgsRasterPipe
 from qgis.core import QgsRasterLayer
@@ -319,7 +319,7 @@ class LizardDownloader:
         if result:
             index = self.import_dialog.organisationComboBox.currentIndex()
             self.selected_organisation = self.organisations[index]['unique_id']
-            print("Selected org: %s" % self.selected_organisation)
+            # print("Selected org: %s" % self.selected_organisation)
             self.start_date = self.import_dialog.startDate.date().toPyDate()
             self.end_date = self.import_dialog.endDate.date().toPyDate()
 
@@ -412,14 +412,14 @@ class LizardDownloader:
         self.upload_custom_points_action.setDisabled(False)
 
     def _record_deleted_point(self, id):
-        print("Point %s has been deleted" % id)
+        # print("Point %s has been deleted" % id)
 
     def _record_added_point(self, id):
-        print("Point %s has been added" % id)
+        # print("Point %s has been added" % id)
 
     def _record_changed_point(self, id, index, dont_care):
         # QgsFeatureId fid, int idx, const QVariant &
-        print("Point %s has been changed" % id)
+        # print("Point %s has been changed" % id)
 
     def run_upload(self):
         to_upload = []
@@ -462,10 +462,10 @@ class LizardDownloader:
                 try:
                     location_uuid = loc_api.add_new_one(values)
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     num_failed += 1
                     continue
-                print("Created location with uuid %s" % location_uuid)
+                # print("Created location with uuid %s" % location_uuid)
 
                 ts_api = TimeSeries()
                 ts_api.username = self.username
@@ -483,15 +483,15 @@ class LizardDownloader:
                 try:
                     ts_id = ts_api.add_new_one(values)
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     num_failed += 1
                     continue
-                print("Created timeserie id=%s" % ts_id)
+                # print("Created timeserie id=%s" % ts_id)
 
                 try:
                     ts_api.add_value(ts_id, value=point['value'])
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     num_failed += 1
                     continue
                 self.already_uploaded.append(point['wkt'])
@@ -522,7 +522,7 @@ class LizardDownloader:
                                 provider.extent(),
                                 provider.crs())
         # http://build-failed.blogspot.nl/2014/12/splitting-vector-and-raster-files-in.html
-        print(tiff_filename)
+        # print(tiff_filename)
 
         # Optionally TODO: grab title from dialog.
         title = "Uploaded by the qgis plugin on %s" % (
@@ -541,14 +541,14 @@ class LizardDownloader:
         body = str(form)
         request.add_header('Content-type', form.get_content_type())
         request.add_header('Content-length', len(body))
-        print("content-length: %s" % len(body))
+        # print("content-length: %s" % len(body))
         request.add_data(body)
 
         fd2, logfile = tempfile.mkstemp(prefix="uploadlog", suffix=".txt")
         open(logfile, 'w').write(request.get_data())
-        print("Printed what we'll send to %s" % logfile)
+        # print("Printed what we'll send to %s" % logfile)
 
         answer = urllib2.urlopen(request).read()
-        print(answer)
-        print("Uploaded geotiff to the server")
+        # print(answer)
+        # print("Uploaded geotiff to the server")
         pop_up_info("Uploaded geotiff to the server")

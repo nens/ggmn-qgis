@@ -1,6 +1,6 @@
 __author__ = 'roel.vandenberg@nelen-schuurmans.nl'
 
-from pprint import pprint  # left here for debugging purposes
+# from pprint import pprint  # left here for debugging purposes
 
 import jsdatetime as jsdt
 import json
@@ -86,14 +86,14 @@ class Base(object):
         # A bit dirty, but store the url for later debugging.
         self.url = url
 
-        print(url)
+        # print(url)
         self.fetch(url)
-        if 'count' in self.json:
-            print('Number found {} : {} with URL: {}'.format(
-                self.data_type, self.json.get('count', 0), url))
-        else:
-            print('Number found {} : {} with URL: {}'.format(
-                self.data_type, len(self.json), url))
+        # if 'count' in self.json:
+        #     print('Number found {} : {} with URL: {}'.format(
+        #         self.data_type, self.json.get('count', 0), url))
+        # else:
+        #     print('Number found {} : {} with URL: {}'.format(
+        #         self.data_type, len(self.json), url))
         self.parse()
         return self.results
 
@@ -128,9 +128,9 @@ class Base(object):
 
     def add_new_one(self, values):
         url = self.base_url + '/'
-        print(url)
+        # print(url)
         data = urllib.urlencode(values)
-        pprint(data)
+        # pprint(data)
         request_obj = urllib2.Request(url, data, headers=self.header)
         response = urllib2.urlopen(request_obj)
         content = response.read().decode('UTF-8')
@@ -191,7 +191,7 @@ class SingleUserInfo(Base):
 
     def organisations_url(self):
         self.get(username=self.username)
-        pprint(self.results)
+        # pprint(self.results)
         assert len(self.results) == 1
         return self.results[0]['organisations_url']
 
@@ -340,7 +340,7 @@ class TimeSeries(Base):
             self.response = {}
             return self.response
         if not values:
-            print("No values passed on, using an empty dict")
+            # print("No values passed on, using an empty dict")
             values = {}
 
         stats1 = ('min', 'max', 'sum', 'count')
@@ -388,7 +388,7 @@ class TimeSeries(Base):
         data_url = self.base_url + '/%s/data/' % ts_id
         data = json.dumps([{'value': value,
                             'datetime': timestamp}])
-        pprint(data_url)
+        # pprint(data_url)
         headers = {}
         headers.update(self.header)
         headers['Content-Type'] = 'application/json'
@@ -397,7 +397,7 @@ class TimeSeries(Base):
         content = response.read().decode('UTF-8')
         response.close()
         result = json.loads(content)
-        pprint(result)
+        # pprint(result)
 
 
 class GroundwaterLocations(Locations):
