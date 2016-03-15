@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.5 (unreleased)
+1.5 (2016-03-15)
 ----------------
 
 - Using MSL again instead of BGS. The layer name was already correct, but the
