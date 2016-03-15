@@ -413,13 +413,16 @@ class LizardDownloader:
 
     def _record_deleted_point(self, id):
         # print("Point %s has been deleted" % id)
+        pass
 
     def _record_added_point(self, id):
         # print("Point %s has been added" % id)
+        pass
 
     def _record_changed_point(self, id, index, dont_care):
         # QgsFeatureId fid, int idx, const QVariant &
         # print("Point %s has been changed" % id)
+        pass
 
     def run_upload(self):
         to_upload = []
