@@ -50,8 +50,8 @@ import urllib2_upload
 resources  # Pyflakes
 
 
-GROUNDWATER_TYPE = 'GWmBGS'
-CUSTOM_GROUNDWATER_TYPE = 'GWmBGSC'
+GROUNDWATER_TYPE = 'GWmMSL'
+CUSTOM_GROUNDWATER_TYPE = 'GWmMSLC'
 
 
 def pop_up_info(msg='', title='Information', parent=None):
