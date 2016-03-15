@@ -4,7 +4,12 @@ GGMN Lizard qgis plugin changelog
 1.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Using MSL again instead of BGS. The layer name was already correct, but the
+  incorrect data was downloaded.
+
+- (Temporarily) removed all print statements. Sometimes it could lead to
+  tracebacks for certain windows qgis/python combinations if you didn't open
+  the python console.
 
 
 1.4 (2016-03-08)
