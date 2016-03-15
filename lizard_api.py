@@ -466,7 +466,7 @@ class GroundwaterTimeSeriesAndLocations(object):
     def bbox(self,
              start='0001-01-01T00:00:00Z',
              end=None,
-             groundwater_type="GWmBGS"):
+             groundwater_type="GWmMSL"):
         if end:
             self.end = end
         else:
