@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.6 (unreleased)
+1.6 (2016-04-12)
 ----------------
 
 - Cleaning up generated zip.
