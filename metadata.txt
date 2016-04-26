@@ -10,7 +10,7 @@
 name=GGMN lizard integration
 qgisMinimumVersion=2.8
 description=Download GGMN data from lizard, interpolate and add new points
-version=1.7
+version=1.8
 author=Reinout van Rees, Nelen & Schuurmans
 email=reinout@vanrees.org
 
