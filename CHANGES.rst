@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.7 (unreleased)
+1.7 (2016-04-26)
 ----------------
 
 - Adjusted for new groundwaterstation/filter configuration.
