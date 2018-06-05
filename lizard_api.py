@@ -21,6 +21,13 @@ def join_urls(*args):
     return '/'.join(args)
 
 
+def tryfloat(x):
+    try:
+        return float(x)
+    except TypeError:
+        return np.nan
+
+
 class ApiError(Exception):
     pass
 
@@ -360,7 +367,7 @@ class TimeSeries(Base):
             if not len(result['events']):
                 ts.append([np.nan for _ in range(len(stats1))] + timestamps)
             else:
-                ts.append([float(result['events'][0][s]) for s in stats1] +
+                ts.append([tryfloat(result['events'][0][s]) for s in stats1] +
                           timestamps)
         npts = np.array(ts)
         npts_calculated = np.hstack((
