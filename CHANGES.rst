@@ -1,7 +1,7 @@
 GGMN Lizard qgis plugin changelog
 =================================
 
-1.8 (unreleased)
+1.8 (2019-04-23)
 ----------------
 
 - Fixed loading of null values in aggregates to nan.
